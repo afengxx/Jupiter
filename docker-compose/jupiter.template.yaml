@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+   jupiter:
+      stdin_open: true
+      tty: true
+      command: [/bin/bash]
+      image: c6supper/jupiter:${JUPITER_TAG}
+      container_name: jupiter
+      network_mode: ${APP_NETWORK_MODE}
+      volumes:
+        - ${JUPITER_CODE_VOLUME}:${JUPITER_DIR}
+      restart: ${APP_RESTART_POLICY}
+      environment:
+         RUN_AFTER_SIDECAR: 'no'
+      logging:
+         driver: ${APP_LOGGING_DRIVER}
+         options:
+            max-size: ${APP_LOGGING_SIZE}
+            max-file: ${APP_LOGGING_NUMBER}
