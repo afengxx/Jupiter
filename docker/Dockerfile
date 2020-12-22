@@ -9,16 +9,21 @@ ARG CPU=mx5
 ARG GLIB=glibc-2.23
 ARG KERNEL=linux-2.6.35.3
 ARG PROXY_SERVER=
-ENV http_proxy=${PROXY_SERVER}
-ENV https_proxy=${PROXY_SERVER}
-ENV ftp_proxy=${PROXY_SERVER}
+# ENV http_proxy=${PROXY_SERVER}
+# ENV https_proxy=${PROXY_SERVER}
+# ENV ftp_proxy=${PROXY_SERVER}
 #ARG BUILD_TYPE=debug
 #ARG BUILD_TYPE=release
 COPY ./${CPU}/${GLIB}/${KERNEL}/.config /.config
 RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
     apt-get update && \
     apt-get -y install gperf bison flex texinfo help2man gawk libtool libncurses5-dev \
-        bash nano wget xz-utils build-essential autoconf && \
+        bash nano wget xz-utils build-essential autoconf unzip && \
+    echo "'https_proxy = $PROXY_SERVER\n\
+        http_proxy = $PROXY_SERVER\n\
+        ftp_proxy = $PROXY_SERVER\n\
+        use_proxy = on\n\
+        '" >> /etc/wgetrc && \
     cd ${CODE_DIR} && wget http://crosstool-ng.org/download/crosstool-ng/crosstool-ng-${CT_VERSION}.tar.bz2 && \
     tar -xf crosstool-ng-${CT_VERSION}.tar.bz2 && cd crosstool-ng-${CT_VERSION} && \
     mv -f /.config .config && ./configure --enable-local && make -j4 && ./ct-ng build
