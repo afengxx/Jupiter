@@ -8,7 +8,10 @@ ARG CT_VERSION=1.24.0
 ARG CPU=mx5
 ARG GLIB=glibc-2.23
 ARG KERNEL=linux-2.6.35.3
-
+ARG PROXY_SERVER=
+ENV http_proxy=${PROXY_SERVER}
+ENV https_proxy=${PROXY_SERVER}
+ENV ftp_proxy=${PROXY_SERVER}
 #ARG BUILD_TYPE=debug
 #ARG BUILD_TYPE=release
 COPY ./${CPU}/${GLIB}/${KERNEL}/.config /.config
