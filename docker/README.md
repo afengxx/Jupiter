@@ -3,7 +3,8 @@
 **Authentication and Authorization server.**  
 
 ## How to build
-1. **Debug, 
+1. **Checkout you kernel source code into current directory**
+2. **Debug, 
       docker build -t c6supper/jupiter -f Dockerfile --build-arg BUILD_TYPE="debug" \
                                                       --build-arg CODE_DIR="/code" \
                                                       --build-arg CPU="mx5" \
