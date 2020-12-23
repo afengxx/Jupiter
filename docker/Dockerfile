@@ -1,4 +1,4 @@
-ARG UBUNTU_VER=14.04
+ARG UBUNTU_VER=20.04
 
 FROM ubuntu:${UBUNTU_VER} AS builder
 ARG DEBIAN_FRONTEND=noninteractive
@@ -20,7 +20,7 @@ COPY ./${CPU}/${GLIB}/${KERNEL}/.config /${BUILD_DIR}/.config
 COPY ./${KERNEL}.tar.bz2 /${BUILD_DIR}/
 RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
     apt-get update && \
-    apt-get -y install gperf bison flex texinfo help2man gawk libtool libncurses5-dev \
+    apt-get -y install gperf bison flex texinfo help2man gawk libtool-bin libncurses5-dev \
         bash nano wget xz-utils build-essential autoconf unzip; \
         echo "https_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
         echo "http_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
@@ -37,7 +37,13 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
     ./ct-ng build
 
  
-# FROM builder-${BUILD_TYPE} AS final
-# RUN echo "VAR is equal to ${VAR}"
+FROM ubuntu:${UBUNTU_VER} AS building-env
+COPY --from=builder /root/x-tools /root/
+
+RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get -y install bash nano; \
+        echo 'export PATH=$PATH:/root/armv7-mx5-linux-gnueabi/bin' >> ~/.bashrc && \
+    echo 'over'
 
 CMD ["/usr/bin/bash"]
