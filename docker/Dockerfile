@@ -10,18 +10,14 @@ ARG GLIB=glibc-2.23
 ARG KERNEL=linux-2.6.35.3
 ARG PROXY_SERVER=
 ARG BUILD_DIR=/code
-# ENV http_proxy=${PROXY_SERVER}
-# ENV https_proxy=${PROXY_SERVER}
-# ENV ftp_proxy=${PROXY_SERVER}
-#ARG BUILD_TYPE=debug
-#ARG BUILD_TYPE=release
+
 RUN mkdir -p ${BUILD_DIR} 
 COPY ./${CPU}/${GLIB}/${KERNEL}/.config /${BUILD_DIR}/.config
 COPY ./${KERNEL}.tar.bz2 /${BUILD_DIR}/
 RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
     apt-get update && \
     apt-get -y install gperf bison flex texinfo help2man gawk libtool-bin libncurses5-dev \
-        bash nano wget xz-utils build-essential autoconf unzip; \
+        bash nano wget xz-utils build-essential autoconf unzip gettext python2 libglib2.0-0:i386; \
         echo "https_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
         echo "http_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
         echo "ftp_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
@@ -40,10 +36,17 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
 FROM ubuntu:${UBUNTU_VER} AS building-env
 COPY --from=builder /root/x-tools /root/
 
+ENV JUPITER_DIR /jupiter
+ENV JUPITER_INITIALIZED_MARK $JUPITER_DIR/patched
+RUN mkdir -p $JUPITER_DIR
+
 RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
     apt-get update && \
     apt-get -y install bash nano; \
         echo 'export PATH=$PATH:/root/armv7-mx5-linux-gnueabi/bin' >> ~/.bashrc && \
     echo 'over'
+
+# initilization for the first time
+ENTRYPOINT ["/jupiter/docker-entrypoint.sh"]
 
 CMD ["/usr/bin/bash"]
