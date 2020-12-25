@@ -68,9 +68,9 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
         --with-python=/usr/bin/python3 && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
-    wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/openssl_1.1.1f.orig.tar.gz && \
-    tar -xf openssl_1.1.1f.orig.tar.gz && \
-    cd openssl-1.1.1f/ && \
+    wget https://www.openssl.org/source/old/1.1.1/openssl-1.1.1h.tar.gz && \
+    tar -xf openssl-1.1.1h.tar.gz && \
+    cd openssl-1.1.1h/ && \
     # wget https://openssl.org/source/openssl-1.0.2h.tar.gz && \
     # tar -xf openssl-1.0.2h.tar.gz && \
     # cd openssl-1.0.2h/ && \
