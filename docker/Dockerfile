@@ -74,7 +74,7 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
     wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/openssl_1.0.2g.orig.tar.gz && \
     tar -xf openssl_1.0.2g.orig.tar.gz && \
     cd openssl-1.0.2g/ && \
-    CC=armv7-mx5-linux-gnueabi-gcc ./Configure linux-armv4 \
+    CC=armv7-mx5-linux-gnueabi-gcc ./Configure linux-armv4 enable-ssl2 enable-ssl3 \
         --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/  && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
