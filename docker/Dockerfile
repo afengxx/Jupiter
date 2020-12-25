@@ -16,6 +16,7 @@ ENV PKG_CONFIG_PATH=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueab
 RUN mkdir -p ${BUILD_DIR}
 COPY ./${CPU}/${GLIB}/${KERNEL}/.config /${BUILD_DIR}/.config
 COPY ./${KERNEL}.tar.bz2 /${BUILD_DIR}/
+ENV PATH=$PATH:/root/x-tools/armv7-mx5-linux-gnueabi/bin
 RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
     dpkg --add-architecture i386 && \
     apt-get update && \
@@ -67,9 +68,12 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
         --with-python=/usr/bin/python3 && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
-    wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/openssl_1.1.1f.orig.tar.gz && \
-    tar -xf openssl_1.1.1f.orig.tar.gz && \
-    cd openssl-1.1.1f/ && \
+    # wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/openssl_1.1.1f.orig.tar.gz && \
+    # tar -xf openssl_1.1.1f.orig.tar.gz && \
+    # cd openssl-1.1.1f/ && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/openssl_1.0.2g.orig.tar.gz && \
+    tar -xf openssl_1.0.2g.orig.tar.gz && \
+    cd openssl-1.0.2g/ && \
     CC=armv7-mx5-linux-gnueabi-gcc ./Configure linux-armv4 \
         --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/  && \
     make -j8 && make install && \
@@ -168,6 +172,21 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxext/libxext_1.3.3.orig.tar.gz && \
     tar -xf libxext_1.3.3.orig.tar.gz && \
     cd libXext-1.3.3/ && \
+    echo enable_malloc0returnsnull=yes>>armv7-mx5-linux.cache && \
+    ./configure --host=armv7-mx5-linux-gnueabi --cache-file=armv7-mx5-linux.cache \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-render/x11proto-render_0.11.1.orig.tar.gz && \
+    tar -xf x11proto-render_0.11.1.orig.tar.gz  && \
+    cd renderproto-0.11.1/ && \
+    ./configure --host=armv7-mx5-linux-gnueabi \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxrender/libxrender_0.9.9.orig.tar.gz && \
+    tar -xf libxrender_0.9.9.orig.tar.gz && \
+    cd libXrender-0.9.9/ && \
     echo enable_malloc0returnsnull=yes>>armv7-mx5-linux.cache && \
     ./configure --host=armv7-mx5-linux-gnueabi --cache-file=armv7-mx5-linux.cache \
         --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
