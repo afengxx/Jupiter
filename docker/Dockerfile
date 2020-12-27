@@ -192,6 +192,125 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
     ./configure --host=armv7-mx5-linux-gnueabi --cache-file=armv7-mx5-linux.cache \
         --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
     make -j8 && make install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/f/freetype/freetype_2.6.1.orig.tar.gz && \
+    tar -xf freetype_2.6.1.orig.tar.gz && \
+    cd freetype_2.6.1.orig.tar.gz && tar -xf freetype_2.6.1.orig.tar.gz && cd freetype-2.6.1 && \
+    ./configure --host=armv7-mx5-linux-gnueabi CFLAGS='-std=gnu99' LD=armv7-mx5-linux-gnueabi-ld \
+        CC=armv7-mx5-linux-gnueabi-gcc AR=armv7-mx5-linux-gnueabi-ar \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
+    make -j8 && make install && \
+    sed -i "s/\/usr\/local/\/root\/x-tools\/armv7-mx5-linux-gnueabi\/armv7-mx5-linux-gnueabi\/sysroot\/usr/g" \
+        /root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/lib/pkgconfig/freetype2.pc && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/libf/libfontenc/libfontenc_1.1.3.orig.tar.gz && \
+    tar -xf libfontenc_1.1.3.orig.tar.gz && \
+    cd libfontenc-1.1.3 && \
+    ./configure --host=armv7-mx5-linux-gnueabi \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-fonts/x11proto-fonts_2.1.3.orig.tar.gz && \
+    tar -xf x11proto-fonts_2.1.3.orig.tar.gz && \
+    cd fontsproto-2.1.3/ && \
+    ./configure --host=armv7-mx5-linux-gnueabi \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxfont/libxfont_1.5.1.orig.tar.gz && \
+    tar -xf libxfont_1.5.1.orig.tar.gz && \
+    cd libXfont-1.5.1/ && \
+    ./configure --host=armv7-mx5-linux-gnueabi \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-xf86bigfont/x11proto-xf86bigfont_1.2.0.orig.tar.gz && \
+    tar -xvf x11proto-xf86bigfont_1.2.0.orig.tar.gz && \
+    cd xf86bigfontproto-1.2.0/ && \
+    ./configure --host=armv7-mx5-linux-gnueabi \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
+    make -j8 install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-xcmisc/x11proto-xcmisc_1.2.2.orig.tar.gz && \
+    tar -xf x11proto-xcmisc_1.2.2.orig.tar.gz && \
+    cd xcmiscproto-1.2.2/ && \
+    ./configure --host=armv7-mx5-linux-gnueabi \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
+    make -j8 install && \ 
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-scrnsaver/x11proto-scrnsaver_1.2.2.orig.tar.gz && \
+    tar -xf x11proto-scrnsaver_1.2.2.orig.tar.gz && \
+    cd scrnsaverproto-1.2.2/ && \
+    ./configure --host=armv7-mx5-linux-gnueabi \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
+    make -j8 install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-bigreqs/x11proto-bigreqs_1.1.2.orig.tar.gz && \
+    tar -xf x11proto-bigreqs_1.1.2.orig.tar.gz && \
+    cd bigreqsproto-1.1.2/ && \
+    ./configure --host=armv7-mx5-linux-gnueabi \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
+    make -j8 install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-resource/x11proto-resource_1.2.0.orig.tar.gz && \
+    tar -xf x11proto-resource_1.2.0.orig.tar.gz && \
+    cd resourceproto-1.2.0/ && \
+    ./configure --host=armv7-mx5-linux-gnueabi \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
+    make -j8 install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-randr/x11proto-randr_1.5.0.orig.tar.gz && \
+    tar -xf x11proto-randr_1.5.0.orig.tar.gz && \
+    cd randrproto-1.5.0/ && \
+    ./configure --host=armv7-mx5-linux-gnueabi \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
+    make -j8 install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-xinerama/x11proto-xinerama_1.2.1.orig.tar.gz && \
+    tar -xf x11proto-xinerama_1.2.1.orig.tar.gz && \
+    cd xineramaproto-1.2.1 && \
+    ./configure --host=armv7-mx5-linux-gnueabi \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
+    make -j8 install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-fixes/x11proto-fixes_5.0.orig.tar.gz && \
+    tar -xf x11proto-fixes_5.0.orig.tar.gz && \
+    cd fixesproto-5.0/ && \
+    ./configure --host=armv7-mx5-linux-gnueabi \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
+    make -j8 install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-damage/x11proto-damage_1.2.1.orig.tar.gz && \
+    tar -xf x11proto-damage_1.2.1.orig.tar.gz && \
+    cd damageproto-1.2.1 && \
+    ./configure --host=armv7-mx5-linux-gnueabi \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
+    make -j8 install && \
+
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxfixes/libxfixes_5.0.1.orig.tar.gz && \
+    tar -xf libxfixes_5.0.1.orig.tar.gz && \
+    cd libXfixes-5.0.1 && \
+    ./configure --host=armv7-mx5-linux-gnueabi \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
+    make -j8 install && \
+    
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxi/libxi_1.7.6.orig.tar.gz && \
+    tar -xf libxi_1.7.6.orig.tar.gz && \
+    cd libXi-1.7.6/ && \
+    echo enable_malloc0returnsnull=yes>>armv7-mx5-linux.cache && \
+    ./configure --host=armv7-mx5-linux-gnueabi --cache-file=armv7-mx5-linux.cache \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
+    make -j8 && make install && \
+    
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxtst/libxtst_1.2.2.orig.tar.gz && \
+    tar -xf libxtst_1.2.2.orig.tar.gz && \
+    cd libXtst-1.2.2/ && \
+    ./configure --host=armv7-mx5-linux-gnueabi \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
+    make -j8 && make install && \
     cd /root/ && tar -Jcf x-tool.tar.xz x-tools
 # RUN wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxinerama/libxinerama_1.1.3.orig.tar.gz && \
 #     tar -xf libxinerama_1.1.3.orig.tar.gz && \
