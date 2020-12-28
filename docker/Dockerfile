@@ -195,7 +195,7 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/f/freetype/freetype_2.6.1.orig.tar.gz && \
     tar -xf freetype_2.6.1.orig.tar.gz && \
-    cd freetype_2.6.1.orig.tar.gz && tar -xf freetype_2.6.1.orig.tar.gz && cd freetype-2.6.1 && \
+    cd freetype-2.6.1 && tar -xf freetype-2.6.1.tar.bz2 && cd freetype-2.6.1 && \
     ./configure --host=armv7-mx5-linux-gnueabi CFLAGS='-std=gnu99' LD=armv7-mx5-linux-gnueabi-ld \
         CC=armv7-mx5-linux-gnueabi-gcc AR=armv7-mx5-linux-gnueabi-ar \
         --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
@@ -286,15 +286,13 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
     ./configure --host=armv7-mx5-linux-gnueabi \
         --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
     make -j8 install && \
-
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxfixes/libxfixes_5.0.1.orig.tar.gz && \
     tar -xf libxfixes_5.0.1.orig.tar.gz && \
     cd libXfixes-5.0.1 && \
-    ./configure --host=armv7-mx5-linux-gnueabi \
+    ./configure --host=armv7-mx5-linux-gnueabi CFLAGS='-DHAVE__XEATDATAWORDS' \
         --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
     make -j8 install && \
-    
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxi/libxi_1.7.6.orig.tar.gz && \
     tar -xf libxi_1.7.6.orig.tar.gz && \
@@ -303,12 +301,18 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
     ./configure --host=armv7-mx5-linux-gnueabi --cache-file=armv7-mx5-linux.cache \
         --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
     make -j8 && make install && \
-    
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-record/x11proto-record_1.14.2.orig.tar.gz && \
+    tar -xf x11proto-record_1.14.2.orig.tar.gz && \
+    cd recordproto-1.14.2 && \
+    ./configure --host=armv7-mx5-linux-gnueabi \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
+    make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxtst/libxtst_1.2.2.orig.tar.gz && \
     tar -xf libxtst_1.2.2.orig.tar.gz && \
     cd libXtst-1.2.2/ && \
-    ./configure --host=armv7-mx5-linux-gnueabi \
+    ./configure --host=armv7-mx5-linux-gnueabi CFLAGS='-DHAVE__XEATDATAWORDS' \
         --prefix=/root/x-tools/armv7-mx5-linux-gnueabi/armv7-mx5-linux-gnueabi/sysroot/usr/ && \
     make -j8 && make install && \
     cd /root/ && tar -Jcf x-tool.tar.xz x-tools
@@ -330,6 +334,7 @@ FROM ubuntu:${UBUNTU_VER} AS building-env
 ARG DEBIAN_FRONTEND=noninteractive
 COPY --from=builder /root/x-tool.tar.xz /root/
 ENV JUPITER_DIR /jupiter
+COPY docker-entrypoint.sh $JUPITER_DIR/
 ENV JUPITER_INITIALIZED_MARK $JUPITER_DIR/patched
 RUN mkdir -p $JUPITER_DIR
 ENV PATH=$PATH:/root/x-tools/armv7-mx5-linux-gnueabi/bin:/root/x-tools/armv7-mx5-linux-gnueabi/fakebin
