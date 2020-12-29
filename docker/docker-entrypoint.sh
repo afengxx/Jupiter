@@ -8,13 +8,12 @@ patch_conf() {
   ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime;
   export DEBIAN_FRONTEND=noninteractive;
   apt install -y rename locales libc6-i386 lib32stdc++6 \
-    subversion git cmake astyle libglib2.0-0:i386 gettext python3 libdbus-1-dev \
-    systemctl nfs-kernel-server;
+    subversion git cmake astyle libglib2.0-0:i386 gettext python3 libdbus-1-dev;
   dpkg-reconfigure --frontend noninteractive tzdata;
-
-  mkdir -p /root/x-tools/armv7-mx5-linux-gnueabi/fakebin/;
-  find /root/x-tools/armv7-mx5-linux-gnueabi/bin -name 'arm*' -exec ln -vs "{}" /root/x-tools/armv7-mx5-linux-gnueabi/fakebin/ ';';
-  cd /root/x-tools/armv7-mx5-linux-gnueabi/fakebin/ && rename 's/armv7-mx5/arm-none/' * ;
+  locale-gen en_US.UTF-8;
+  mkdir -p /root/x-tools/armv7-mx5-linux-gnueabihf/fakebin/;
+  find /root/x-tools/armv7-mx5-linux-gnueabihf/bin -name 'arm*' -exec ln -vs "{}" /root/x-tools/armv7-mx5-linux-gnueabihf/fakebin/ ';';
+  cd /root/x-tools/armv7-mx5-linux-gnueabihf/fakebin/ && rename 's/armv7-mx5/arm-none/' * ;
 
   # envsubst "$defined_envs" < "/etc/guacamole/guacamole.properties.template" > "/etc/guacamole/guacamole.properties"
 }
