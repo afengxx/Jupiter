@@ -21,7 +21,8 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
     dpkg --add-architecture i386 && \
     apt-get update && \
     apt-get -y install locales gperf bison flex texinfo help2man gawk libtool-bin libncurses5-dev \
-        bash nano wget xz-utils build-essential autoconf unzip gettext python3 pkg-config; \
+        bash nano wget xz-utils build-essential autoconf unzip gettext python3 pkg-config \
+        xutils-dev ; \
     echo "https_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
         echo "http_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
         echo "ftp_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
@@ -63,7 +64,7 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
     echo glib_cv_uscore=no>>armv7-mx5-linux.cache && \
     ln -s /usr/bin/python2.7 /usr/bin/python2.5 && \
     ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr \
         --disable-option-checking --cache-file=armv7-mx5-linux.cache \
         --with-python=/usr/bin/python3 && \
     make -j8 && make install && \
@@ -348,6 +349,21 @@ RUN cd ${BUILD_DIR} && \
         --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxkbfile/libxkbfile_1.0.9.orig.tar.gz && \
+    tar -xf libxkbfile_1.0.9.orig.tar.gz && \
+    cd libxkbfile-1.0.9 && \
+    ./configure --host=armv7-mx5-linux-gnueabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxkbcommon/libxkbcommon_0.5.0.orig.tar.gz && \
+    tar -xf libxkbcommon_0.5.0.orig.tar.gz && \
+    cd libxkbcommon-0.5.0/ && \
+    ./autogen.sh && \
+    ./configure --host=armv7-mx5-linux-gnueabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/xorg-server/xorg-server_1.19.6.orig.tar.gz && \
     tar -xf xorg-server_1.19.6.orig.tar.gz && \
     cd xorg-server-1.19.6 && \
@@ -365,14 +381,32 @@ RUN cd ${BUILD_DIR} && \
         --disable-glx --enable-sparkle=no --disable-screensaver --disable-xvmc --disable-xdmcp \
         --disable-xdm-auth-1 --disable-xinerama --disable-xace --enable-xselinux=no \
         --enable-xcsecurity=no && \
-    make -j8 && make install && \
+    make -j8 && make install
+
+FROM xserver-builder AS misc-builder
+RUN cd ${BUILD_DIR} && \
+    # wget http://archive.ubuntu.com/ubuntu/pool/main/s/sysfsutils/sysfsutils_2.1.0+repack.orig.tar.gz && \
+    # tar -xf sysfsutils_2.1.0+repack.orig.tar.gz && \
+    # cd sysfsutils-2.1.0/ && \
+    # ./configure --host=armv7-mx5-linux-gnueabihf \
+    #     --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    # make -j8 && make install && \
+    # cd ${BUILD_DIR} && \    
+    wget https://busybox.net/downloads/busybox-1.32.0.tar.bz2 && \
+    tar -xf busybox-1.32.0.tar.bz2 && \
+    cd busybox-1.32.0 && \
+    make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-gnueabihf- defconfig && \
+    make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-gnueabihf- && \
+    make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-gnueabihf- \
+        install CONFIG_PREFIX=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/ && \
     cd ${BUILD_DIR} && \
-    wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxkbfile/libxkbfile_1.0.9.orig.tar.gz && \
-    tar -xf libxkbfile_1.0.9.orig.tar.gz && \
-    cd libxkbfile-1.0.9 && \
+    wget http://archive.ubuntu.com/ubuntu/pool/universe/t/tslib/tslib_1.21.orig.tar.xz && \
+    tar -xf tslib_1.21.orig.tar.xz && \
+    cd tslib-1.21/ && \
+    echo "#define EVIOCGPROP(len)        _IOC(_IOC_READ, 'E', 0x09, len)        /* get device properties */" >> src/tslib.h && \
     ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
-    make -j8 && make install && \
+         --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+     make -j8 && make install && \
     cd /root/ && tar -Jcf x-tool.tar.xz x-tools
 # RUN wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxinerama/libxinerama_1.1.3.orig.tar.gz && \
 #     tar -xf libxinerama_1.1.3.orig.tar.gz && \
@@ -390,7 +424,7 @@ RUN cd ${BUILD_DIR} && \
 
 FROM ubuntu:${UBUNTU_VER} AS building-env
 ARG DEBIAN_FRONTEND=noninteractive
-COPY --from=x11-builder /root/x-tool.tar.xz /root/
+COPY --from=misc-builder /root/x-tool.tar.xz /root/
 ENV JUPITER_DIR /jupiter
 COPY docker-entrypoint.sh $JUPITER_DIR/
 ENV JUPITER_INITIALIZED_MARK $JUPITER_DIR/patched

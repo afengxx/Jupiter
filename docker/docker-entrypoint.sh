@@ -13,7 +13,7 @@ patch_conf() {
   locale-gen en_US.UTF-8;
   mkdir -p /root/x-tools/armv7-mx5-linux-gnueabihf/fakebin/;
   find /root/x-tools/armv7-mx5-linux-gnueabihf/bin -name 'arm*' -exec ln -vs "{}" /root/x-tools/armv7-mx5-linux-gnueabihf/fakebin/ ';';
-  cd /root/x-tools/armv7-mx5-linux-gnueabihf/fakebin/ && rename 's/armv7-mx5/arm-none/' * ;
+  cd /root/x-tools/armv7-mx5-linux-gnueabihf/fakebin/ && rename 's/armv7-mx5-linux-gnueabihf/arm-none-linux-gnueabi/' * ;
 
   # envsubst "$defined_envs" < "/etc/guacamole/guacamole.properties.template" > "/etc/guacamole/guacamole.properties"
 }
