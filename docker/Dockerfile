@@ -22,7 +22,7 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
     apt-get update && \
     apt-get -y install locales gperf bison flex texinfo help2man gawk libtool-bin libncurses5-dev \
         bash nano wget xz-utils build-essential autoconf unzip gettext python3 pkg-config \
-        xutils-dev ; \
+        xutils-dev cmake; \
     echo "https_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
         echo "http_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
         echo "ftp_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
@@ -317,6 +317,20 @@ RUN cd ${BUILD_DIR} && \
     cd libXtst-1.2.2/ && \
     ./configure --host=armv7-mx5-linux-gnueabihf CFLAGS='-DHAVE__XEATDATAWORDS' \
         --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxinerama/libxinerama_1.1.3.orig.tar.gz && \
+    tar -xf libxinerama_1.1.3.orig.tar.gz && \
+    cd libXinerama-1.1.3/ && \
+    ./configure --host=armv7-mx5-linux-gnueabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/x/xinput/xinput_1.6.2.orig.tar.gz && \
+    tar -xvf xinput_1.6.2.orig.tar.gz && \
+    cd xinput-1.6.2/ && \
+    ./configure --host=armv7-mx5-linux-gnueabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
     make -j8 && make install
 
 FROM x11-builder AS xserver-builder
@@ -383,15 +397,49 @@ RUN cd ${BUILD_DIR} && \
         --enable-xcsecurity=no && \
     make -j8 && make install
 
-FROM xserver-builder AS qt-builder
+FROM xserver-builder AS vnc-builder
+RUN cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/libv/libvncserver/libvncserver_0.9.13+dfsg.orig.tar.xz && \
+    tar -xf libvncserver_0.9.13+dfsg.orig.tar.xz && \
+    cd libvncserver-LibVNCServer-0.9.13/ && \
+    echo "set(COMPILER_PREFIX "armv7-mx5-linux-gnueabihf")" >> cmake/cross && \
+    echo "find_program(CMAKE_C_COMPILER NAMES \${COMPILER_PREFIX}-gcc)" >> cmake/cross && \
+    echo "find_program(CMAKE_C_COMPILER NAMES \${COMPILER_PREFIX}-g++)" >> cmake/cross && \
+    echo "SET(USER_ROOT_PATH \${CMAKE_CURRENT_SOURCE_DIR}/deps)" >> cmake/cross && \
+    echo "SET(CMAKE_FIND_ROOT_PATH /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot \${USER_ROOT_PATH})" >> cmake/cross && \
+    echo "set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)" >> cmake/cross && \
+    echo "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)" >> cmake/cross && \
+    echo "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)" >> cmake/cross && \
+    echo "set(CMAKE_INSTALL_LIBDIR /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/lib)" >> cmake/cross && \
+    echo "set(CMAKE_INSTALL_INCLUDEDIR /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/include)" >> cmake/cross && \
+    cmake ./ -DCMAKE_TOOLCHAIN_FILE=cmake/cross -DWITH_OPENSSL=ON -DWITH_GCRYPT=OFF && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/universe/x/x11vnc/x11vnc_0.9.16.orig.tar.gz && \
+    tar -xvf x11vnc_0.9.16.orig.tar.gz && \
+    cd x11vnc-0.9.16/ && \
+    ./autogen.sh --host=armv7-mx5-linux-gnueabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+   make -j8 && make install
+
+FROM vnc-builder AS qt-builder
+ARG CPU
 COPY ./linux-${CPU}-gnueabihf-g++ /${BUILD_DIR}/linux-${CPU}-gnueabihf-g++
 RUN cd ${BUILD_DIR} && \
-    wget http://mirrors.ustc.edu.cn/qtproject/archive/qt/5.12/5.12.10/single/qt-everywhere-src-5.12.10.tar.xz && \
+    wget http://archive.ubuntu.com/ubuntu/pool/universe/t/tslib/tslib_1.21.orig.tar.xz && \
+    tar -xf tslib_1.21.orig.tar.xz && \
+    cd tslib-1.21/ && \
+    echo "#define EVIOCGPROP(len)        _IOC(_IOC_READ, 'E', 0x09, len)        /* get device properties */" >> src/tslib.h && \
+    ./configure --host=armv7-mx5-linux-gnueabihf \
+         --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
+    wget --no-proxy http://mirrors.ustc.edu.cn/qtproject/archive/qt/5.12/5.12.10/single/qt-everywhere-src-5.12.10.tar.xz && \
     tar -xf qt-everywhere-src-5.12.10.tar.xz && \
     cd qt-everywhere-src-5.12.10 && \
     mv -f /${BUILD_DIR}/linux-${CPU}-gnueabihf-g++ ./qtbase/mkspecs/devices/ && \
-    unset PKG_CONFIG_PATH && \
-    PKG_CONFIG_SYSROOT_DIR=/ ./configure -release -linuxfb -xcb -device linux-mx5-gnueabihf-g++ -device-option CROSS_COMPILE=armv7-mx5-linux-gnueabihf- \
+    PKG_CONFIG_PATH="" PKG_CONFIG_SYSROOT_DIR="/" ./configure -sysroot /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/ \
+        -release -linuxfb -xcb -device linux-mx5-gnueabihf-g++ -device-option CROSS_COMPILE=armv7-mx5-linux-gnueabihf- \
         -opensource -confirm-license -eventfd -inotify -no-opengl -pkg-config \
         -tslib -nomake tests -no-use-gold-linker -recheck -glib \
         -hostprefix /root/x-tools/armv7-mx5-linux-gnueabihf/bin/ \
@@ -406,13 +454,6 @@ RUN cd ${BUILD_DIR} && \
 
 FROM qt-builder AS misc-builder
 RUN cd ${BUILD_DIR} && \
-    # wget http://archive.ubuntu.com/ubuntu/pool/main/s/sysfsutils/sysfsutils_2.1.0+repack.orig.tar.gz && \
-    # tar -xf sysfsutils_2.1.0+repack.orig.tar.gz && \
-    # cd sysfsutils-2.1.0/ && \
-    # ./configure --host=armv7-mx5-linux-gnueabihf \
-    #     --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
-    # make -j8 && make install && \
-    # cd ${BUILD_DIR} && \    
     wget https://busybox.net/downloads/busybox-1.32.0.tar.bz2 && \
     tar -xf busybox-1.32.0.tar.bz2 && \
     cd busybox-1.32.0 && \
@@ -420,46 +461,7 @@ RUN cd ${BUILD_DIR} && \
     make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-gnueabihf- && \
     make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-gnueabihf- \
         install CONFIG_PREFIX=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/ && \
-    cd ${BUILD_DIR} && \
-    wget http://archive.ubuntu.com/ubuntu/pool/universe/t/tslib/tslib_1.21.orig.tar.xz && \
-    tar -xf tslib_1.21.orig.tar.xz && \
-    cd tslib-1.21/ && \
-    echo "#define EVIOCGPROP(len)        _IOC(_IOC_READ, 'E', 0x09, len)        /* get device properties */" >> src/tslib.h && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-         --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
-    make -j8 && make install && \
-#    cd ${BUILD_DIR} && \
-#    wget http://mirrors.ustc.edu.cn/qtproject/archive/qt/5.12/5.12.10/single/qt-everywhere-src-5.12.10.tar.xz && \
-#    tar -xf qt-everywhere-src-5.12.10.tar.xz && \
-#    cd qt-everywhere-src-5.12.10 && \
-#    mv -f /${BUILD_DIR}/linux-${CPU}-gnueabihf-g++ ./qtbase/mkspecs/devices/ && \
-#    unset PKG_CONFIG_PATH && \
-#     PKG_CONFIG_SYSROOT_DIR=/ ./configure -release -linuxfb -xcb -device linux-mx5-gnueabihf-g++ -device-option CROSS_COMPILE=armv7-mx5-linux-gnueabihf- \
-#        -opensource -confirm-license -eventfd -inotify -no-opengl -pkg-config \
-#        -tslib -nomake tests -no-use-gold-linker -recheck -glib \
-#        -hostprefix /root/x-tools/armv7-mx5-linux-gnueabihf/bin/ \
-#        -extprefix /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
-#        -prefix /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
-#        -skip qtquickcontrols -skip qtactiveqt -skip qtandroidextras -skip qtdeclarative -skip qtmacextras -skip qtserialport \
-#        -skip qtconnectivity -skip qtdoc -skip qtgraphicaleffects -skip qtlocation -skip qtmultimedia \
-#        -skip qtsensors -skip qttools -skip qtscript -skip qtwayland -skip qtwinextras -no-mtdev -no-eglfs -verbose \
-#        -no-feature-qt3d-opengl-renderer -no-feature-qt3d-render -no-feature-qt3d-simd-avx2 -no-feature-qt3d-simd-sse2 \
-#        -no-feature-qt3d-animation -no-feature-qt3d-extras -no-feature-qt3d-input -no-feature-qt3d-logic && \
-#    make -j8 && make install && \
     cd /root/ && tar -Jcf x-tool.tar.xz x-tools
-# RUN wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxinerama/libxinerama_1.1.3.orig.tar.gz && \
-#     tar -xf libxinerama_1.1.3.orig.tar.gz && \
-#     cd libXinerama-1.1.3/ && \
-#     ./configure --host=armv7-mx5-linux-gnueabihf \
-#         --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
-#     make -j8 && make install;
-
-# RUN wget http://archive.ubuntu.com/ubuntu/pool/main/x/xinput/xinput_1.6.2.orig.tar.gz && \
-#     tar -xvf xinput_1.6.2.orig.tar.gz && \
-#     cd xinput-1.6.2/ && \
-#     ./configure --host=armv7-mx5-linux-gnueabihf \
-#         --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
-#     make -j8 && make install;
 
 FROM ubuntu:${UBUNTU_VER} AS building-env
 ARG DEBIAN_FRONTEND=noninteractive
