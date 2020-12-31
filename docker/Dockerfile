@@ -384,6 +384,7 @@ RUN cd ${BUILD_DIR} && \
     make -j8 && make install
 
 FROM xserver-builder AS misc-builder
+COPY ./linux-${CPU}-gnueabihf-g++ /${BUILD_DIR}/linux-${CPU}-gnueabihf-g++
 RUN cd ${BUILD_DIR} && \
     # wget http://archive.ubuntu.com/ubuntu/pool/main/s/sysfsutils/sysfsutils_2.1.0+repack.orig.tar.gz && \
     # tar -xf sysfsutils_2.1.0+repack.orig.tar.gz && \
@@ -411,6 +412,7 @@ RUN cd ${BUILD_DIR} && \
     wget http://mirrors.ustc.edu.cn/qtproject/archive/qt/5.12/5.12.10/single/qt-everywhere-src-5.12.10.tar.xz && \
     tar -xf qt-everywhere-src-5.12.10.tar.xz && \
     cd qt-everywhere-src-5.12.10 && \
+    mv -f /${BUILD_DIR}/linux-${CPU}-gnueabihf-g++ ./qtbase/mkspecs/devices/ && \
     unset PKG_CONFIG_PATH && \
     PKG_CONFIG_SYSROOT_DIR=/ ./configure -release -linuxfb -xcb -device linux-mx5-gnueabihf-g++ -device-option CROSS_COMPILE=armv7-mx5-linux-gnueabihf- \
         -opensource -confirm-license -eventfd -inotify -no-opengl -pkg-config \
