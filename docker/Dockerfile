@@ -326,6 +326,14 @@ RUN cd ${BUILD_DIR} && \
         --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxrandr/libxrandr_1.5.0.orig.tar.gz && \
+    tar -xvf libxrandr_1.5.0.orig.tar.gz && \
+    cd libXrandr-1.5.0/ && \
+    echo enable_malloc0returnsnull=yes>>armv7-mx5-linux.cache && \
+    ./configure --host=armv7-mx5-linux-gnueabihf --cache-file=armv7-mx5-linux.cache \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/xinput/xinput_1.6.2.orig.tar.gz && \
     tar -xvf xinput_1.6.2.orig.tar.gz && \
     cd xinput-1.6.2/ && \
