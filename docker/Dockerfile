@@ -406,7 +406,24 @@ RUN cd ${BUILD_DIR} && \
     echo "#define EVIOCGPROP(len)        _IOC(_IOC_READ, 'E', 0x09, len)        /* get device properties */" >> src/tslib.h && \
     ./configure --host=armv7-mx5-linux-gnueabihf \
          --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
-     make -j8 && make install && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
+    wget http://mirrors.ustc.edu.cn/qtproject/archive/qt/5.12/5.12.10/single/qt-everywhere-src-5.12.10.tar.xz && \
+    tar -xf qt-everywhere-src-5.12.10.tar.xz && \
+    cd qt-everywhere-src-5.12.10 && \
+    unset PKG_CONFIG_PATH && \
+    PKG_CONFIG_SYSROOT_DIR=/ ./configure -release -linuxfb -xcb -device linux-mx5-gnueabihf-g++ -device-option CROSS_COMPILE=armv7-mx5-linux-gnueabihf- \
+        -opensource -confirm-license -eventfd -inotify -no-opengl -pkg-config \
+        -tslib -nomake tests -no-use-gold-linker -recheck -glib \
+        -hostprefix /root/x-tools/armv7-mx5-linux-gnueabihf/bin/ \
+        -extprefix /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
+        -prefix /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
+        -skip qtquickcontrols -skip qtactiveqt -skip qtandroidextras -skip qtdeclarative -skip qtmacextras -skip qtserialport \
+        -skip qtconnectivity -skip qtdoc -skip qtgraphicaleffects -skip qtlocation -skip qtmultimedia \
+        -skip qtsensors -skip qttools -skip qtscript -skip qtwayland -skip qtwinextras -no-mtdev -no-eglfs -verbose \
+        -no-feature-qt3d-opengl-renderer -no-feature-qt3d-render -no-feature-qt3d-simd-avx2 -no-feature-qt3d-simd-sse2 \
+        -no-feature-qt3d-animation -no-feature-qt3d-extras -no-feature-qt3d-input -no-feature-qt3d-logic && \
+    make -j8 && make install && \
     cd /root/ && tar -Jcf x-tool.tar.xz x-tools
 # RUN wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxinerama/libxinerama_1.1.3.orig.tar.gz && \
 #     tar -xf libxinerama_1.1.3.orig.tar.gz && \
