@@ -14,7 +14,7 @@ ENV PKG_CONFIG_PATH=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnue
 #ARG BUILD_TYPE=debug
 #ARG BUILD_TYPE=release
 RUN mkdir -p ${BUILD_DIR}
-COPY ./${CPU}/${GLIB}/${KERNEL}/.config /${BUILD_DIR}/.config
+COPY ./configuration/gcc/${CPU}/${GLIB}/${KERNEL}/.config /${BUILD_DIR}/.config
 COPY ./${KERNEL}.tar.bz2 /${BUILD_DIR}/
 ENV PATH=$PATH:/root/x-tools/armv7-mx5-linux-gnueabihf/bin
 RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
@@ -432,7 +432,7 @@ RUN cd ${BUILD_DIR} && \
 
 FROM vnc-builder AS qt-builder
 ARG CPU
-COPY ./linux-${CPU}-gnueabihf-g++ /${BUILD_DIR}/linux-${CPU}-gnueabihf-g++
+COPY ./configuration/qt/linux-${CPU}-gnueabihf-g++ /${BUILD_DIR}/linux-${CPU}-gnueabihf-g++
 RUN cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/universe/t/tslib/tslib_1.21.orig.tar.xz && \
     tar -xf tslib_1.21.orig.tar.xz && \
@@ -450,7 +450,7 @@ RUN cd ${BUILD_DIR} && \
         -release -linuxfb -xcb -device linux-mx5-gnueabihf-g++ -device-option CROSS_COMPILE=armv7-mx5-linux-gnueabihf- \
         -opensource -confirm-license -eventfd -inotify -no-opengl -pkg-config \
         -tslib -nomake tests -no-use-gold-linker -recheck -glib \
-        -hostprefix /root/x-tools/armv7-mx5-linux-gnueabihf/bin/ \
+        -hostprefix /root/x-tools/armv7-mx5-linux-gnueabihf/ \
         -extprefix /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
         -prefix /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
         -skip qtquickcontrols -skip qtactiveqt -skip qtandroidextras -skip qtdeclarative -skip qtmacextras -skip qtserialport \
