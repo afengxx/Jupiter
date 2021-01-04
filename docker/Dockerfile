@@ -448,7 +448,7 @@ RUN cd ${BUILD_DIR} && \
     mv -f /${BUILD_DIR}/linux-${CPU}-gnueabihf-g++ ./qtbase/mkspecs/devices/ && \
     PKG_CONFIG_PATH="" PKG_CONFIG_SYSROOT_DIR="/" ./configure -sysroot /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/ \
         -release -linuxfb -xcb -device linux-mx5-gnueabihf-g++ -device-option CROSS_COMPILE=armv7-mx5-linux-gnueabihf- \
-        -opensource -confirm-license -eventfd -inotify -no-opengl -pkg-config \
+        -opensource -confirm-license -eventfd -inotify -no-opengl -pkg-config -force-asserts \
         -tslib -nomake tests -no-use-gold-linker -recheck -glib \
         -hostprefix /root/x-tools/armv7-mx5-linux-gnueabihf/ \
         -extprefix /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
