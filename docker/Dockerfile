@@ -22,7 +22,7 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
     apt-get update && \
     apt-get -y install locales gperf bison flex texinfo help2man gawk libtool-bin libncurses5-dev \
         bash nano wget xz-utils build-essential autoconf unzip gettext python3 pkg-config \
-        xutils-dev cmake; \
+        xutils-dev cmake unzip; \
     echo "https_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
         echo "http_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
         echo "ftp_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
@@ -386,23 +386,31 @@ RUN cd ${BUILD_DIR} && \
         --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
-    wget http://archive.ubuntu.com/ubuntu/pool/main/x/xorg-server/xorg-server_1.19.6.orig.tar.gz && \
-    tar -xf xorg-server_1.19.6.orig.tar.gz && \
-    cd xorg-server-1.19.6 && \
+    wget https://github.com/tinycorelinux/tinyx/archive/master.zip -O tinyx.zip && \
+    unzip tinyx.zip && \
+    cd tinyx-master/ && \
     ./configure --host=armv7-mx5-linux-gnueabihf \
         --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
-        --enable-docs=no --enable-devel-docs=no --enable-unit-tests=no --enable-aiglx=no \
-        --enable-glx-tls=no --disable-registry --disable-composite --disable-mitshm \
-        --disable-record --disable-dga --enable-dri=no --enable-dri2=no --disable-xf86vidmode \
-        --disable-dpms --enable-xaa=no --enable-xorg=no --enable-vgahw=no --enable-vbe=no \
-        --enable-int10-module=no --enable-libdrm=no --disable-clientids --enable-pciaccess=no \
-        --enable-dmx=no --enable-xnest=no --enable-xquartz=no --enable-standalone-xpbproxy=no \
-        --enable-xwin=no --enable-kdrive=yes --enable-xephyr=no --enable-xfake=no \
-        --enable-xfbdev=yes --enable-kdrive-kbd=yes --enable-kdrive-mouse=yes \
-        --enable-kdrive-evdev=yes --enable-unix-transport --enable-tcp-transport \
-        --disable-glx --enable-sparkle=no --disable-screensaver --disable-xvmc --disable-xdmcp \
-        --disable-xdm-auth-1 --disable-xinerama --disable-xace --enable-xselinux=no \
-        --enable-xcsecurity=no && \
+        --disable-screensaver --disable-xdmcp --disable-xdm-auth-1 --disable-dbe \
+        --disable-xf86bigfont --disable-dpms && \
+    # use tinycore linux instead
+    # wget http://archive.ubuntu.com/ubuntu/pool/main/x/xorg-server/xorg-server_1.19.6.orig.tar.gz && \
+    # tar -xf xorg-server_1.19.6.orig.tar.gz && \
+    # cd xorg-server-1.19.6 && \
+    # ./configure --host=armv7-mx5-linux-gnueabihf \
+    #     --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
+    #     --enable-docs=no --enable-devel-docs=no --enable-unit-tests=no --enable-aiglx=no \
+    #     --enable-glx-tls=no --disable-registry --disable-composite --disable-mitshm \
+    #     --disable-record --disable-dga --enable-dri=no --enable-dri2=no --disable-xf86vidmode \
+    #     --disable-dpms --enable-xaa=no --enable-xorg=no --enable-vgahw=no --enable-vbe=no \
+    #     --enable-int10-module=no --enable-libdrm=no --disable-clientids --enable-pciaccess=no \
+    #     --enable-dmx=no --enable-xnest=no --enable-xquartz=no --enable-standalone-xpbproxy=no \
+    #     --enable-xwin=no --enable-kdrive=yes --enable-xephyr=no --enable-xfake=no \
+    #     --enable-xfbdev=yes --enable-kdrive-kbd=yes --enable-kdrive-mouse=yes \
+    #     --enable-kdrive-evdev=yes --enable-unix-transport --enable-tcp-transport \
+    #     --disable-glx --enable-sparkle=no --disable-screensaver --disable-xvmc --disable-xdmcp \
+    #     --disable-xdm-auth-1 --disable-xinerama --disable-xace --enable-xselinux=no \
+    #     --enable-xcsecurity=no && \
     make -j8 && make install
 
 FROM xserver-builder AS vnc-builder

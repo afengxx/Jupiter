@@ -8,7 +8,7 @@ patch_conf() {
   ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime;
   export DEBIAN_FRONTEND=noninteractive;
   apt install -y rename locales libc6-i386 lib32stdc++6 \
-    subversion git cmake astyle libglib2.0-0:i386 gettext python3 libdbus-1-dev;
+    subversion git cmake astyle libglib2.0-0:i386 gettext python3 libdbus-1-dev unzip;
   dpkg-reconfigure --frontend noninteractive tzdata;
   locale-gen en_US.UTF-8;
   mkdir -p /root/x-tools/armv7-mx5-linux-gnueabihf/fakebin/;
