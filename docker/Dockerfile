@@ -14,7 +14,7 @@ ENV PKG_CONFIG_PATH=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnue
 #ARG BUILD_TYPE=debug
 #ARG BUILD_TYPE=release
 RUN mkdir -p ${BUILD_DIR}
-COPY ./configuration/gcc/${CPU}/${GLIB}/${KERNEL}/.config /${BUILD_DIR}/.config
+COPY ./configuration/gcc/${CPU}/${GLIB}/${KERNEL}/.config /${BUILD_DIR}/gcc.config
 COPY ./${KERNEL}.tar.bz2 /${BUILD_DIR}/
 ENV PATH=$PATH:/root/x-tools/armv7-mx5-linux-gnueabihf/bin
 RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
@@ -22,7 +22,7 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
     apt-get update && \
     apt-get -y install locales gperf bison flex texinfo help2man gawk libtool-bin libncurses5-dev \
         bash nano wget xz-utils build-essential autoconf unzip gettext python3 pkg-config \
-        xutils-dev cmake unzip; \
+        xutils-dev cmake unzip xtrans-dev; \
     echo "https_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
         echo "http_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
         echo "ftp_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
@@ -34,10 +34,18 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
     tar -xf crosstool-ng-${CT_VERSION}.tar.bz2 && \
     cd ${BUILD_DIR} && tar -xf ${KERNEL}.tar.bz2 && \
     cd ${BUILD_DIR}/crosstool-ng-${CT_VERSION} && \
-    mv -f /${BUILD_DIR}/.config .config ;./configure --enable-local && \
+    mv -f /${BUILD_DIR}/gcc.config .config ;./configure --enable-local && \
     make -j8 && \
     cd ${BUILD_DIR}/crosstool-ng-${CT_VERSION} && \
     ./ct-ng build && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/n/ncurses/ncurses_6.0+20160213.orig.tar.gz && \
+    tar -xf ncurses_6.0+20160213.orig.tar.gz && \
+    cd ncurses-6.0-20160213 && \
+    ./configure --host=armv7-mx5-linux-gnueabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
+    --without-tests --with-termlib --with-shread && \
+    make -j8 install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/z/zlib/zlib_1.2.8.dfsg.orig.tar.gz && \
     tar -xvf zlib_1.2.8.dfsg.orig.tar.gz && \
@@ -389,6 +397,7 @@ RUN cd ${BUILD_DIR} && \
     wget https://github.com/tinycorelinux/tinyx/archive/master.zip -O tinyx.zip && \
     unzip tinyx.zip && \
     cd tinyx-master/ && \
+    autoreconf -i && \
     ./configure --host=armv7-mx5-linux-gnueabihf \
         --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
         --disable-screensaver --disable-xdmcp --disable-xdm-auth-1 --disable-dbe \
@@ -469,14 +478,37 @@ RUN cd ${BUILD_DIR} && \
    make -j8 && make install
 
 FROM qt-builder AS misc-builder
+ARG CPU
+# COPY ./configuration/busybox/${CPU}/.config /${BUILD_DIR}/busybox.config
 RUN cd ${BUILD_DIR} && \
     wget https://busybox.net/downloads/busybox-1.32.0.tar.bz2 && \
     tar -xf busybox-1.32.0.tar.bz2 && \
     cd busybox-1.32.0 && \
+    # mv -f /${BUILD_DIR}/busybox.config .config  && \
     make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-gnueabihf- defconfig && \
-    make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-gnueabihf- && \
+    make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-gnueabihf- -j8 && \
     make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-gnueabihf- \
         install CONFIG_PREFIX=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/ && \
+    # cd ${BUILD_DIR} && \
+    # wget https://github.com/OpenRC/openrc/archive/master.zip -O openrc.zip && \
+    # unzip openrc.zip && \
+    # cd openrc-master && \
+    # MKBASHCOMP=no MKNET=no MKPREFIX=no MKPKGCONFIG=no MKSELINUX=no \
+    #     MKSTATICLIBS=no MKSYSVINIT=no MKTERMCAP=ncurses MKZSHCOMP=no \
+    #     SH=/bin/sh DESTDIR=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/ \
+    #     CC=armv7-mx5-linux-gnueabihf-gcc make install -j8 && \
+    wget https://mmonit.com/monit/dist/monit-5.27.1.tar.gz && \
+    tar -xvf monit-5.27.1.tar.gz && \
+    cd monit-5.27.1 && \
+    ./configure --host=armv7-mx5-linux-gnueabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
+        --without-pam --without-ssl --enable-optimized && \
+    make -j8 && make install && \
+    echo 'set httpd port 3813' >> /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/etc/monitrc; \
+    echo 'allow veex:monit' >> /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/etc/monitrc; \
+    echo 'include /usr/etc/monit/conf.d/*' >> /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/etc/monitrc && \
+    echo 'include /home/monit/conf.d/*' >> /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/etc/monitrc && \
+    mkdir -p /root/x-tools/armv7-mx5-linux-gnueabihf/sysroot/usr/etc/monit/conf.d/ && \
     cd /root/ && tar -Jcf x-tool.tar.xz x-tools
 
 FROM ubuntu:${UBUNTU_VER} AS building-env
