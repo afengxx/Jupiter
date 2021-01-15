@@ -22,7 +22,7 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
     apt-get update && \
     apt-get -y install locales gperf bison flex texinfo help2man gawk libtool-bin libncurses5-dev \
         bash nano wget xz-utils build-essential autoconf unzip gettext python3 pkg-config \
-        xutils-dev cmake unzip xtrans-dev; \
+        xutils-dev cmake unzip xtrans-dev git; \
     echo "https_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
         echo "http_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
         echo "ftp_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
@@ -99,8 +99,11 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
     cd dbus-1.10.6 && \
     ./configure --host=armv7-mx5-linux-gnueabihf \
         --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
-    make -j8 && make install
+    make -j8 && make install && \
+    sed -i 's/#include <linux\/socket.h>/#include <bits\/sockaddr.h>/g' \
+        /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/include/linux/netlink.h 
 
+#currently we put whole x11 in to containers
 FROM cross-compiler-builder AS x11-builder
 RUN cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-core/x11proto-core_7.0.31.orig.tar.gz && \
@@ -447,6 +450,7 @@ RUN cd ${BUILD_DIR} && \
         --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
    make -j8 && make install
 
+#currently we put qt into container
 FROM vnc-builder AS qt-builder
 ARG CPU
 COPY ./configuration/qt/linux-${CPU}-gnueabihf-g++ /${BUILD_DIR}/linux-${CPU}-gnueabihf-g++
@@ -477,8 +481,34 @@ RUN cd ${BUILD_DIR} && \
         -no-feature-qt3d-animation -no-feature-qt3d-extras -no-feature-qt3d-input -no-feature-qt3d-logic && \
    make -j8 && make install
 
-FROM qt-builder AS misc-builder
-ARG CPU
+# FROM qt-builder AS go-builder
+# RUN cd ${BUILD_DIR} && \
+#     wget http://archive.ubuntu.com/ubuntu/pool/main/libg/libgpg-error/libgpg-error_1.37.orig.tar.bz2 && \
+#     tar -xf libgpg-error_1.37.orig.tar.bz2 && \
+#     cd libgpg-error-1.37/ && \
+#     ./configure --host=armv7-mx5-linux-gnueabihf \
+#          --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+#     make -j8 && make install && \
+#     cd ${BUILD_DIR} && \
+#     wget http://archive.ubuntu.com/ubuntu/pool/main/liba/libassuan/libassuan_2.5.3.orig.tar.bz2 && \
+#     tar -xf libassuan_2.5.3.orig.tar.bz2 && \
+#     cd libassuan-2.5.3/ && \
+#     ./configure --host=armv7-mx5-linux-gnueabihf \
+#          --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
+#          --with-libgpg-error-prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+#     make -j8 && make install && \
+#     cd ${BUILD_DIR} && \
+#     wget http://archive.ubuntu.com/ubuntu/pool/main/g/gpgme1.0/gpgme1.0_1.13.1.orig.tar.bz2 && \
+#     tar -xf gpgme1.0_1.13.1.orig.tar.bz2 && \
+#     cd gpgme-1.13.1/ && \
+#     ./configure --host=armv7-mx5-linux-gnueabihf \
+#          --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
+#          --with-libgpg-error-prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
+#          --with-libassuan-prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+#     make -j8 && make install 
+
+FROM cross-compiler-builder AS misc-builder
+# ARG CPU
 # COPY ./configuration/busybox/${CPU}/.config /${BUILD_DIR}/busybox.config
 RUN cd ${BUILD_DIR} && \
     wget https://busybox.net/downloads/busybox-1.32.0.tar.bz2 && \
@@ -489,26 +519,49 @@ RUN cd ${BUILD_DIR} && \
     make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-gnueabihf- -j8 && \
     make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-gnueabihf- \
         install CONFIG_PREFIX=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/ && \
-    # cd ${BUILD_DIR} && \
-    # wget https://github.com/OpenRC/openrc/archive/master.zip -O openrc.zip && \
-    # unzip openrc.zip && \
-    # cd openrc-master && \
-    # MKBASHCOMP=no MKNET=no MKPREFIX=no MKPKGCONFIG=no MKSELINUX=no \
-    #     MKSTATICLIBS=no MKSYSVINIT=no MKTERMCAP=ncurses MKZSHCOMP=no \
-    #     SH=/bin/sh DESTDIR=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/ \
-    #     CC=armv7-mx5-linux-gnueabihf-gcc make install -j8 && \
-    wget https://mmonit.com/monit/dist/monit-5.27.1.tar.gz && \
-    tar -xvf monit-5.27.1.tar.gz && \
-    cd monit-5.27.1 && \
+    cd ${BUILD_DIR} && \
+    wget https://github.com/OpenRC/openrc/archive/master.zip -O openrc.zip && \
+    unzip openrc.zip && \
+    cd openrc-master && \
+    MKBASHCOMP=no MKNET=no MKPREFIX=no MKPKGCONFIG=no MKSELINUX=no \
+        MKSTATICLIBS=no MKSYSVINIT=no MKTERMCAP=ncurses MKZSHCOMP=no \
+        SH=/bin/sh DESTDIR=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/ \
+        CC=armv7-mx5-linux-gnueabihf-gcc make install -j8 && \
+    #overwrite tar to support lxc
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/t/tar/tar_1.30+dfsg.orig.tar.xz && \
+    tar -xf tar_1.30+dfsg.orig.tar.xz && \
+    cd tar-1.30/ && \
     ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
-        --without-pam --without-ssl --enable-optimized && \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
     make -j8 && make install && \
-    echo 'set httpd port 3813' >> /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/etc/monitrc; \
-    echo 'allow veex:monit' >> /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/etc/monitrc; \
-    echo 'include /usr/etc/monit/conf.d/*' >> /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/etc/monitrc && \
-    echo 'include /home/monit/conf.d/*' >> /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/etc/monitrc && \
-    mkdir -p /root/x-tools/armv7-mx5-linux-gnueabihf/sysroot/usr/etc/monit/conf.d/ && \
+    cd ${BUILD_DIR} && \
+    # wget https://linuxcontainers.org/downloads/lxc/lxc-2.1.1.tar.gz && \
+    # tar -xf lxc-2.1.1.tar.gz && \
+    # cd lxc-2.1.1 && \
+    git clone git://github.com/lxc/lxc -b stable-4.0 && \
+    cd lxc && ./autogen.sh && \
+    ./configure --host=armv7-mx5-linux-gnueabihf \
+        --prefix=/usr/local/jrootfs/usr --localstatedir=/var \
+        --disable-doc --disable-api-docs --disable-examples --disable-tests; \
+    echo "#define HAVE_SETNS (1)" >> src/config.h; \
+    echo "#ifndef __aligned_u64" >> src/config.h; \
+    echo "#define __aligned_u64 __u64 __attribute__((aligned(8)))" >> src/config.h; \
+    echo "#endif" >> src/config.h && \
+    make -j8 && \
+    DESTDIR=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot make install && \
+    # wget https://mmonit.com/monit/dist/monit-5.27.1.tar.gz && \
+    # tar -xvf monit-5.27.1.tar.gz && \
+    # cd monit-5.27.1 && \
+    # ./configure --host=armv7-mx5-linux-gnueabihf \
+    #     --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
+    #     --without-pam --without-ssl --enable-optimized && \
+    # make -j8 && make install && \
+    # echo 'set httpd port 3813' >> /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/etc/monitrc; \
+    # echo 'allow veex:monit' >> /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/etc/monitrc; \
+    # echo 'include /usr/etc/monit/conf.d/*' >> /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/etc/monitrc && \
+    # echo 'include /home/monit/conf.d/*' >> /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/etc/monitrc && \
+    # mkdir -p /root/x-tools/armv7-mx5-linux-gnueabihf/sysroot/usr/etc/monit/conf.d/ && \
     cd /root/ && tar -Jcf x-tool.tar.xz x-tools
 
 FROM ubuntu:${UBUNTU_VER} AS building-env
