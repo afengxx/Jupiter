@@ -543,7 +543,7 @@ RUN cd ${BUILD_DIR} && \
     cd lxc && ./autogen.sh && \
     ./configure --host=armv7-mx5-linux-gnueabihf \
         --prefix=/usr/local/jrootfs/usr --localstatedir=/var \
-        --disable-doc --disable-api-docs --disable-examples --disable-tests; \
+        --disable-doc --disable-api-docs --disable-examples --disable-tests with_distro="noNeed"; \
     echo "#define HAVE_SETNS (1)" >> src/config.h; \
     echo "#ifndef __aligned_u64" >> src/config.h; \
     echo "#define __aligned_u64 __u64 __attribute__((aligned(8)))" >> src/config.h; \
