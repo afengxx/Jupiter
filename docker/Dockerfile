@@ -10,13 +10,13 @@ ARG GLIB=glibc-2.23
 ARG KERNEL=linux-2.6.35.3
 ARG PROXY_SERVER=
 ARG BUILD_DIR=/code/
-ENV PKG_CONFIG_PATH=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/lib/pkgconfig/:/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/lib/pkgconfig/:/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/share/pkgconfig/
+ENV PKG_CONFIG_PATH=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/lib/pkgconfig/:/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/lib/pkgconfig/:/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/share/pkgconfig/
 #ARG BUILD_TYPE=debug
 #ARG BUILD_TYPE=release
 RUN mkdir -p ${BUILD_DIR}
 COPY ./configuration/gcc/${CPU}/${GLIB}/${KERNEL}/.config /${BUILD_DIR}/gcc.config
 COPY ./${KERNEL}.tar.bz2 /${BUILD_DIR}/
-ENV PATH=$PATH:/root/x-tools/armv7-mx5-linux-gnueabihf/bin
+ENV PATH=$PATH:/root/x-tools/armv7-mx5-linux-musleabihf/bin
 RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
     dpkg --add-architecture i386 && \
     apt-get update && \
@@ -42,27 +42,27 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
     wget http://archive.ubuntu.com/ubuntu/pool/main/n/ncurses/ncurses_6.0+20160213.orig.tar.gz && \
     tar -xf ncurses_6.0+20160213.orig.tar.gz && \
     cd ncurses-6.0-20160213 && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
     --without-tests --with-termlib --with-shread && \
     make -j8 install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/z/zlib/zlib_1.2.8.dfsg.orig.tar.gz && \
     tar -xvf zlib_1.2.8.dfsg.orig.tar.gz && \
     cd zlib-1.2.8/ && \
-    CC=armv7-mx5-linux-gnueabihf-gcc ./configure --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr && \
+    CC=armv7-mx5-linux-musleabihf-gcc ./configure --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libf/libffi/libffi_3.2.1.orig.tar.gz && \
     tar -xf libffi_3.2.1.orig.tar.gz && \
     cd libffi-3.2.1 && \
-    ./configure --enable-builddir=armv7-mx5-linux-gnueabihf --host=armv7-mx5-linux-gnueabihf --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ host_alias=armv7-mx5-linux-gnueabihf && \
+    ./configure --enable-builddir=armv7-mx5-linux-musleabihf --host=armv7-mx5-linux-musleabihf --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ host_alias=armv7-mx5-linux-musleabihf && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/p/pcre3/pcre3_8.38.orig.tar.gz && \
     tar -xf pcre3_8.38.orig.tar.gz && \
     cd pcre-8.38/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/g/glib2.0/glib2.0_2.48.2.orig.tar.xz && \
@@ -71,8 +71,8 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
     echo glib_cv_stack_grows=no>>armv7-mx5-linux.cache && \
     echo glib_cv_uscore=no>>armv7-mx5-linux.cache && \
     ln -s /usr/bin/python2.7 /usr/bin/python2.5 && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr \
         --disable-option-checking --cache-file=armv7-mx5-linux.cache \
         --with-python=/usr/bin/python3 && \
     make -j8 && make install && \
@@ -83,25 +83,25 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
     # wget https://openssl.org/source/openssl-1.0.2h.tar.gz && \
     # tar -xf openssl-1.0.2h.tar.gz && \
     # cd openssl-1.0.2h/ && \
-    CC=armv7-mx5-linux-gnueabihf-gcc ./Configure linux-armv4 enable-ssl3-method enable-ssl2 enable-ssl3 \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/  && \
+    CC=armv7-mx5-linux-musleabihf-gcc ./Configure linux-armv4 enable-ssl3-method enable-ssl2 enable-ssl3 \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/  && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/e/expat/expat_2.1.0.orig.tar.gz && \
     tar -xf expat_2.1.0.orig.tar.gz && \
     cd expat-2.1.0 && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/d/dbus/dbus_1.10.6.orig.tar.gz && \
     tar -xf dbus_1.10.6.orig.tar.gz && \
     cd dbus-1.10.6 && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     sed -i 's/#include <linux\/socket.h>/#include <bits\/sockaddr.h>/g' \
-        /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/include/linux/netlink.h 
+        /root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/include/linux/netlink.h 
 
 #currently we put whole x11 in to containers
 FROM cross-compiler-builder AS x11-builder
@@ -109,247 +109,247 @@ RUN cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-core/x11proto-core_7.0.31.orig.tar.gz && \
     tar -xf x11proto-core_7.0.31.orig.tar.gz && \
     cd xproto-7.0.31 && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxdmcp/libxdmcp_1.1.2.orig.tar.gz && \
     tar -xf libxdmcp_1.1.2.orig.tar.gz && \
     cd libXdmcp-1.1.2 && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxau/libxau_1.0.8.orig.tar.gz && \
     tar -xf libxau_1.0.8.orig.tar.gz && \
     cd libXau-1.0.8/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/universe/x/xcb-proto/xcb-proto_1.11.orig.tar.gz && \
     tar -xf xcb-proto_1.11.orig.tar.gz && \
     cd xcb-proto-1.11 && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \ 
     wget http://archive.ubuntu.com/ubuntu/pool/main/libp/libpthread-stubs/libpthread-stubs_0.3.orig.tar.gz && \
     tar -xf libpthread-stubs_0.3.orig.tar.gz && \
     cd libpthread-stubs-0.3/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxcb/libxcb_1.11.1.orig.tar.gz && \
     tar -xf libxcb_1.11.1.orig.tar.gz && \
     cd libxcb-1.11.1/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-input/x11proto-input_2.3.1.orig.tar.gz && \
     tar -xf x11proto-input_2.3.1.orig.tar.gz && \
     cd inputproto-2.3.1/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-xext/x11proto-xext_7.3.0.orig.tar.gz && \
     tar -xf x11proto-xext_7.3.0.orig.tar.gz && \
     cd xextproto-7.3.0/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/xtrans/xtrans_1.3.5.orig.tar.gz && \
     tar -xf xtrans_1.3.5.orig.tar.gz && \
     cd xtrans-1.3.5 && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-kb/x11proto-kb_1.0.7.orig.tar.gz && \
     tar -xf x11proto-kb_1.0.7.orig.tar.gz && \
     cd kbproto-1.0.7/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libx11/libx11_1.6.12.orig.tar.gz && \
     tar -xf libx11_1.6.12.orig.tar.gz && \
     cd libX11-1.6.12/ && \
     echo enable_malloc0returnsnull=yes>>armv7-mx5-linux.cache && \
-    ./configure --host=armv7-mx5-linux-gnueabihf --cache-file=armv7-mx5-linux.cache \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf --cache-file=armv7-mx5-linux.cache \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxext/libxext_1.3.3.orig.tar.gz && \
     tar -xf libxext_1.3.3.orig.tar.gz && \
     cd libXext-1.3.3/ && \
     echo enable_malloc0returnsnull=yes>>armv7-mx5-linux.cache && \
-    ./configure --host=armv7-mx5-linux-gnueabihf --cache-file=armv7-mx5-linux.cache \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf --cache-file=armv7-mx5-linux.cache \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-render/x11proto-render_0.11.1.orig.tar.gz && \
     tar -xf x11proto-render_0.11.1.orig.tar.gz  && \
     cd renderproto-0.11.1/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxrender/libxrender_0.9.9.orig.tar.gz && \
     tar -xf libxrender_0.9.9.orig.tar.gz && \
     cd libXrender-0.9.9/ && \
     echo enable_malloc0returnsnull=yes>>armv7-mx5-linux.cache && \
-    ./configure --host=armv7-mx5-linux-gnueabihf --cache-file=armv7-mx5-linux.cache \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf --cache-file=armv7-mx5-linux.cache \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/f/freetype/freetype_2.6.1.orig.tar.gz && \
     tar -xf freetype_2.6.1.orig.tar.gz && \
     cd freetype-2.6.1 && tar -xf freetype-2.6.1.tar.bz2 && cd freetype-2.6.1 && \
-    ./configure --host=armv7-mx5-linux-gnueabihf CFLAGS='-std=gnu99' LD=armv7-mx5-linux-gnueabihf-ld \
-        CC=armv7-mx5-linux-gnueabihf-gcc AR=armv7-mx5-linux-gnueabihf-ar \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf CFLAGS='-std=gnu99' LD=armv7-mx5-linux-musleabihf-ld \
+        CC=armv7-mx5-linux-musleabihf-gcc AR=armv7-mx5-linux-musleabihf-ar \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
-    sed -i "s/\/usr\/local/\/root\/x-tools\/armv7-mx5-linux-gnueabihf\/armv7-mx5-linux-gnueabihf\/sysroot\/usr/g" \
-        /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/lib/pkgconfig/freetype2.pc && \
+    sed -i "s/\/usr\/local/\/root\/x-tools\/armv7-mx5-linux-musleabihf\/armv7-mx5-linux-musleabihf\/sysroot\/usr/g" \
+        /root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/lib/pkgconfig/freetype2.pc && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libf/libfontenc/libfontenc_1.1.3.orig.tar.gz && \
     tar -xf libfontenc_1.1.3.orig.tar.gz && \
     cd libfontenc-1.1.3 && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-fonts/x11proto-fonts_2.1.3.orig.tar.gz && \
     tar -xf x11proto-fonts_2.1.3.orig.tar.gz && \
     cd fontsproto-2.1.3/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxfont/libxfont_1.5.1.orig.tar.gz && \
     tar -xf libxfont_1.5.1.orig.tar.gz && \
     cd libXfont-1.5.1/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-xf86bigfont/x11proto-xf86bigfont_1.2.0.orig.tar.gz && \
     tar -xvf x11proto-xf86bigfont_1.2.0.orig.tar.gz && \
     cd xf86bigfontproto-1.2.0/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-xcmisc/x11proto-xcmisc_1.2.2.orig.tar.gz && \
     tar -xf x11proto-xcmisc_1.2.2.orig.tar.gz && \
     cd xcmiscproto-1.2.2/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 install && \ 
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-scrnsaver/x11proto-scrnsaver_1.2.2.orig.tar.gz && \
     tar -xf x11proto-scrnsaver_1.2.2.orig.tar.gz && \
     cd scrnsaverproto-1.2.2/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-bigreqs/x11proto-bigreqs_1.1.2.orig.tar.gz && \
     tar -xf x11proto-bigreqs_1.1.2.orig.tar.gz && \
     cd bigreqsproto-1.1.2/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-resource/x11proto-resource_1.2.0.orig.tar.gz && \
     tar -xf x11proto-resource_1.2.0.orig.tar.gz && \
     cd resourceproto-1.2.0/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-randr/x11proto-randr_1.5.0.orig.tar.gz && \
     tar -xf x11proto-randr_1.5.0.orig.tar.gz && \
     cd randrproto-1.5.0/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-xinerama/x11proto-xinerama_1.2.1.orig.tar.gz && \
     tar -xf x11proto-xinerama_1.2.1.orig.tar.gz && \
     cd xineramaproto-1.2.1 && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-fixes/x11proto-fixes_5.0.orig.tar.gz && \
     tar -xf x11proto-fixes_5.0.orig.tar.gz && \
     cd fixesproto-5.0/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-damage/x11proto-damage_1.2.1.orig.tar.gz && \
     tar -xf x11proto-damage_1.2.1.orig.tar.gz && \
     cd damageproto-1.2.1 && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxfixes/libxfixes_5.0.1.orig.tar.gz && \
     tar -xf libxfixes_5.0.1.orig.tar.gz && \
     cd libXfixes-5.0.1 && \
-    ./configure --host=armv7-mx5-linux-gnueabihf CFLAGS='-DHAVE__XEATDATAWORDS' \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf CFLAGS='-DHAVE__XEATDATAWORDS' \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxi/libxi_1.7.6.orig.tar.gz && \
     tar -xf libxi_1.7.6.orig.tar.gz && \
     cd libXi-1.7.6/ && \
     echo enable_malloc0returnsnull=yes>>armv7-mx5-linux.cache && \
-    ./configure --host=armv7-mx5-linux-gnueabihf --cache-file=armv7-mx5-linux.cache \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf --cache-file=armv7-mx5-linux.cache \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-record/x11proto-record_1.14.2.orig.tar.gz && \
     tar -xf x11proto-record_1.14.2.orig.tar.gz && \
     cd recordproto-1.14.2 && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxtst/libxtst_1.2.2.orig.tar.gz && \
     tar -xf libxtst_1.2.2.orig.tar.gz && \
     cd libXtst-1.2.2/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf CFLAGS='-DHAVE__XEATDATAWORDS' \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf CFLAGS='-DHAVE__XEATDATAWORDS' \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxinerama/libxinerama_1.1.3.orig.tar.gz && \
     tar -xf libxinerama_1.1.3.orig.tar.gz && \
     cd libXinerama-1.1.3/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxrandr/libxrandr_1.5.0.orig.tar.gz && \
     tar -xvf libxrandr_1.5.0.orig.tar.gz && \
     cd libXrandr-1.5.0/ && \
     echo enable_malloc0returnsnull=yes>>armv7-mx5-linux.cache && \
-    ./configure --host=armv7-mx5-linux-gnueabihf --cache-file=armv7-mx5-linux.cache \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf --cache-file=armv7-mx5-linux.cache \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/xinput/xinput_1.6.2.orig.tar.gz && \
     tar -xvf xinput_1.6.2.orig.tar.gz && \
     cd xinput-1.6.2/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install
 
 FROM x11-builder AS xserver-builder
@@ -357,60 +357,60 @@ RUN cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/p/pixman/pixman_0.33.6.orig.tar.gz && \
     tar -xf pixman_0.33.6.orig.tar.gz && \
     cd pixman-0.33.6/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-video/x11proto-video_2.3.2.orig.tar.gz && \
     tar -xf x11proto-video_2.3.2.orig.tar.gz && \
     cd videoproto-2.3.2/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/xorgproto/xorgproto_2018.4.orig.tar.gz && \
     tar -xf xorgproto_2018.4.orig.tar.gz && \
     cd xorgproto-2018.4/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxfont/libxfont_2.0.3.orig.tar.gz && \
     tar -xf libxfont_2.0.3.orig.tar.gz && \
     cd libXfont2-2.0.3/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxkbfile/libxkbfile_1.0.9.orig.tar.gz && \
     tar -xf libxkbfile_1.0.9.orig.tar.gz && \
     cd libxkbfile-1.0.9 && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxkbcommon/libxkbcommon_0.5.0.orig.tar.gz && \
     tar -xf libxkbcommon_0.5.0.orig.tar.gz && \
     cd libxkbcommon-0.5.0/ && \
     ./autogen.sh && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget https://github.com/tinycorelinux/tinyx/archive/master.zip -O tinyx.zip && \
     unzip tinyx.zip && \
     cd tinyx-master/ && \
     autoreconf -i && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
         --disable-screensaver --disable-xdmcp --disable-xdm-auth-1 --disable-dbe \
         --disable-xf86bigfont --disable-dpms && \
     # use tinycore linux instead
     # wget http://archive.ubuntu.com/ubuntu/pool/main/x/xorg-server/xorg-server_1.19.6.orig.tar.gz && \
     # tar -xf xorg-server_1.19.6.orig.tar.gz && \
     # cd xorg-server-1.19.6 && \
-    # ./configure --host=armv7-mx5-linux-gnueabihf \
-    #     --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
+    # ./configure --host=armv7-mx5-linux-musleabihf \
+    #     --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
     #     --enable-docs=no --enable-devel-docs=no --enable-unit-tests=no --enable-aiglx=no \
     #     --enable-glx-tls=no --disable-registry --disable-composite --disable-mitshm \
     #     --disable-record --disable-dga --enable-dri=no --enable-dri2=no --disable-xf86vidmode \
@@ -430,50 +430,50 @@ RUN cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libv/libvncserver/libvncserver_0.9.13+dfsg.orig.tar.xz && \
     tar -xf libvncserver_0.9.13+dfsg.orig.tar.xz && \
     cd libvncserver-LibVNCServer-0.9.13/ && \
-    echo "set(COMPILER_PREFIX "armv7-mx5-linux-gnueabihf")" >> cmake/cross && \
+    echo "set(COMPILER_PREFIX "armv7-mx5-linux-musleabihf")" >> cmake/cross && \
     echo "find_program(CMAKE_C_COMPILER NAMES \${COMPILER_PREFIX}-gcc)" >> cmake/cross && \
     echo "find_program(CMAKE_C_COMPILER NAMES \${COMPILER_PREFIX}-g++)" >> cmake/cross && \
     echo "SET(USER_ROOT_PATH \${CMAKE_CURRENT_SOURCE_DIR}/deps)" >> cmake/cross && \
-    echo "SET(CMAKE_FIND_ROOT_PATH /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot \${USER_ROOT_PATH})" >> cmake/cross && \
+    echo "SET(CMAKE_FIND_ROOT_PATH /root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot \${USER_ROOT_PATH})" >> cmake/cross && \
     echo "set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)" >> cmake/cross && \
     echo "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)" >> cmake/cross && \
     echo "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)" >> cmake/cross && \
-    echo "set(CMAKE_INSTALL_LIBDIR /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/lib)" >> cmake/cross && \
-    echo "set(CMAKE_INSTALL_INCLUDEDIR /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/include)" >> cmake/cross && \
+    echo "set(CMAKE_INSTALL_LIBDIR /root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/lib)" >> cmake/cross && \
+    echo "set(CMAKE_INSTALL_INCLUDEDIR /root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/include)" >> cmake/cross && \
     cmake ./ -DCMAKE_TOOLCHAIN_FILE=cmake/cross -DWITH_OPENSSL=ON -DWITH_GCRYPT=OFF && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/universe/x/x11vnc/x11vnc_0.9.16.orig.tar.gz && \
     tar -xvf x11vnc_0.9.16.orig.tar.gz && \
     cd x11vnc-0.9.16/ && \
-    ./autogen.sh --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./autogen.sh --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
    make -j8 && make install
 
 #currently we put qt into container
 FROM vnc-builder AS qt-builder
 ARG CPU
-COPY ./configuration/qt/linux-${CPU}-gnueabihf-g++ /${BUILD_DIR}/linux-${CPU}-gnueabihf-g++
+COPY ./configuration/qt/linux-${CPU}-musleabihf-g++ /${BUILD_DIR}/linux-${CPU}-musleabihf-g++
 RUN cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/universe/t/tslib/tslib_1.21.orig.tar.xz && \
     tar -xf tslib_1.21.orig.tar.xz && \
     cd tslib-1.21/ && \
     echo "#define EVIOCGPROP(len)        _IOC(_IOC_READ, 'E', 0x09, len)        /* get device properties */" >> src/tslib.h && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-         --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+         --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget --no-proxy http://mirrors.ustc.edu.cn/qtproject/archive/qt/5.12/5.12.10/single/qt-everywhere-src-5.12.10.tar.xz && \
     tar -xf qt-everywhere-src-5.12.10.tar.xz && \
     cd qt-everywhere-src-5.12.10 && \
-    mv -f /${BUILD_DIR}/linux-${CPU}-gnueabihf-g++ ./qtbase/mkspecs/devices/ && \
-    PKG_CONFIG_PATH="" PKG_CONFIG_SYSROOT_DIR="/" ./configure -sysroot /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/ \
-        -release -linuxfb -xcb -device linux-mx5-gnueabihf-g++ -device-option CROSS_COMPILE=armv7-mx5-linux-gnueabihf- \
+    mv -f /${BUILD_DIR}/linux-${CPU}-musleabihf-g++ ./qtbase/mkspecs/devices/ && \
+    PKG_CONFIG_PATH="" PKG_CONFIG_SYSROOT_DIR="/" ./configure -sysroot /root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/ \
+        -release -linuxfb -xcb -device linux-mx5-musleabihf-g++ -device-option CROSS_COMPILE=armv7-mx5-linux-musleabihf- \
         -opensource -confirm-license -eventfd -inotify -no-opengl -pkg-config -force-asserts \
         -tslib -nomake tests -no-use-gold-linker -recheck -glib \
-        -hostprefix /root/x-tools/armv7-mx5-linux-gnueabihf/ \
-        -extprefix /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
-        -prefix /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
+        -hostprefix /root/x-tools/armv7-mx5-linux-musleabihf/ \
+        -extprefix /root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
+        -prefix /root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
         -skip qtquickcontrols -skip qtactiveqt -skip qtandroidextras -skip qtdeclarative -skip qtmacextras -skip qtserialport \
         -skip qtconnectivity -skip qtdoc -skip qtgraphicaleffects -skip qtlocation -skip qtmultimedia \
         -skip qtsensors -skip qttools -skip qtscript -skip qtwayland -skip qtwinextras -no-mtdev -no-eglfs -verbose \
@@ -486,30 +486,30 @@ RUN cd ${BUILD_DIR} && \
 #     wget http://archive.ubuntu.com/ubuntu/pool/main/libg/libgpg-error/libgpg-error_1.37.orig.tar.bz2 && \
 #     tar -xf libgpg-error_1.37.orig.tar.bz2 && \
 #     cd libgpg-error-1.37/ && \
-#     ./configure --host=armv7-mx5-linux-gnueabihf \
-#          --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+#     ./configure --host=armv7-mx5-linux-musleabihf \
+#          --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
 #     make -j8 && make install && \
 #     cd ${BUILD_DIR} && \
 #     wget http://archive.ubuntu.com/ubuntu/pool/main/liba/libassuan/libassuan_2.5.3.orig.tar.bz2 && \
 #     tar -xf libassuan_2.5.3.orig.tar.bz2 && \
 #     cd libassuan-2.5.3/ && \
-#     ./configure --host=armv7-mx5-linux-gnueabihf \
-#          --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
-#          --with-libgpg-error-prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+#     ./configure --host=armv7-mx5-linux-musleabihf \
+#          --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
+#          --with-libgpg-error-prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
 #     make -j8 && make install && \
 #     cd ${BUILD_DIR} && \
 #     wget http://archive.ubuntu.com/ubuntu/pool/main/g/gpgme1.0/gpgme1.0_1.13.1.orig.tar.bz2 && \
 #     tar -xf gpgme1.0_1.13.1.orig.tar.bz2 && \
 #     cd gpgme-1.13.1/ && \
-#     ./configure --host=armv7-mx5-linux-gnueabihf \
-#          --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
-#          --with-libgpg-error-prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
-#          --with-libassuan-prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+#     ./configure --host=armv7-mx5-linux-musleabihf \
+#          --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
+#          --with-libgpg-error-prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
+#          --with-libassuan-prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
 #     make -j8 && make install 
 
 FROM cross-compiler-builder AS misc-builder
-# ARG CPU
-# COPY ./configuration/busybox/${CPU}/.config /${BUILD_DIR}/busybox.config
+ARG CPU
+COPY ./configuration/busybox/${CPU}/.config /${BUILD_DIR}/busybox.config
 RUN cd ${BUILD_DIR} && \
     #kernel 2.6.35 doesn't support SYS_renameat2
     # wget https://github.com/libfuse/libfuse/releases/download/fuse-3.10.1/fuse-3.10.1.tar.xz && \
@@ -517,10 +517,10 @@ RUN cd ${BUILD_DIR} && \
     # cd fuse-3.10.1 && sed -i '/^udev/,$ s/^/#/' util/meson.build && \
     # echo <<< EOL \
     #     $'[binaries]\n'\
-    #     $'c = \'armv7-mx5-linux-gnueabihf-gcc\'\n' \
-    #     $'cpp = \'armv7-mx5-linux-gnueabihf-g++\'\n' \
-    #     $'ar = \'armv7-mx5-linux-gnueabihf-ar\'\n' \
-    #     $'strip = \'armv7-mx5-linux-gnueabihf-strip\'\n' \
+    #     $'c = \'armv7-mx5-linux-musleabihf-gcc\'\n' \
+    #     $'cpp = \'armv7-mx5-linux-musleabihf-g++\'\n' \
+    #     $'ar = \'armv7-mx5-linux-musleabihf-ar\'\n' \
+    #     $'strip = \'armv7-mx5-linux-musleabihf-strip\'\n' \
     #     $'pkgconfig = \'pkg-config\'\n' \
     #     $'[host_machine]\n' \
     #     $'system = \'linux\'\n' \
@@ -528,7 +528,7 @@ RUN cd ${BUILD_DIR} && \
     #     $'cpu = \'armv7\'\n' \
     #     $'endian = \'little\'\n' \
     # >> ./cross; \
-    # meson buildir --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr \
+    # meson buildir --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr \
     #     --cross-file cross -Dexamples=false -Ddisable-mtab=true; \
     # echo <<< EOL \
     #     $'#ifndef PR_SET_NO_NEW_PRIVS\n' \
@@ -542,26 +542,26 @@ RUN cd ${BUILD_DIR} && \
     wget https://busybox.net/downloads/busybox-1.32.0.tar.bz2 && \
     tar -xf busybox-1.32.0.tar.bz2 && \
     cd busybox-1.32.0 && \
-    # mv -f /${BUILD_DIR}/busybox.config .config  && \
-    make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-gnueabihf- defconfig && \
-    make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-gnueabihf- -j8 && \
-    make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-gnueabihf- \
-        install CONFIG_PREFIX=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/ && \
+    mv -f /${BUILD_DIR}/busybox.config .config  && \
+    # make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-musleabihf- defconfig && \
+    make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-musleabihf- -j8 && \
+    make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-musleabihf- \
+        install CONFIG_PREFIX=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/ && \
     cd ${BUILD_DIR} && \
     wget https://github.com/OpenRC/openrc/archive/master.zip -O openrc.zip && \
     unzip openrc.zip && \
     cd openrc-master && \
     MKBASHCOMP=no MKNET=no MKPREFIX=no MKPKGCONFIG=no MKSELINUX=no \
         MKSTATICLIBS=no MKSYSVINIT=no MKTERMCAP=ncurses MKZSHCOMP=no \
-        SH=/bin/sh DESTDIR=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/ \
-        CC=armv7-mx5-linux-gnueabihf-gcc make install -j8 && \
+        SH=/bin/sh DESTDIR=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/ \
+        CC=armv7-mx5-linux-musleabihf-gcc make install -j8 && \
     #overwrite tar to support lxc
     cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/t/tar/tar_1.30+dfsg.orig.tar.xz && \
     tar -xf tar_1.30+dfsg.orig.tar.xz && \
     cd tar-1.30/ && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     # wget https://linuxcontainers.org/downloads/lxc/lxc-2.1.1.tar.gz && \
@@ -569,7 +569,8 @@ RUN cd ${BUILD_DIR} && \
     # cd lxc-2.1.1 && \
     git clone git://github.com/lxc/lxc -b stable-4.0 && \
     cd lxc && ./autogen.sh && \
-    ./configure --host=armv7-mx5-linux-gnueabihf \
+    ./configure --host=armv7-mx5-linux-musleabihf with_distro="noNeed" \
+        --enable-static=no --enable-shared=yes \
         --prefix=/usr/local/jrootfs/usr --localstatedir=/var \
         --disable-doc --disable-api-docs --disable-examples --disable-tests; \
     echo "#define HAVE_SETNS (1)" >> src/config.h; \
@@ -577,19 +578,19 @@ RUN cd ${BUILD_DIR} && \
     echo "#define __aligned_u64 __u64 __attribute__((aligned(8)))" >> src/config.h; \
     echo "#endif" >> src/config.h && \
     make -j8 && \
-    DESTDIR=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot make install && \
+    DESTDIR=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot make install && \
     # wget https://mmonit.com/monit/dist/monit-5.27.1.tar.gz && \
     # tar -xvf monit-5.27.1.tar.gz && \
     # cd monit-5.27.1 && \
-    # ./configure --host=armv7-mx5-linux-gnueabihf \
-    #     --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ \
+    # ./configure --host=armv7-mx5-linux-musleabihf \
+    #     --prefix=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
     #     --without-pam --without-ssl --enable-optimized && \
     # make -j8 && make install && \
-    # echo 'set httpd port 3813' >> /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/etc/monitrc; \
-    # echo 'allow veex:monit' >> /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/etc/monitrc; \
-    # echo 'include /usr/etc/monit/conf.d/*' >> /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/etc/monitrc && \
-    # echo 'include /home/monit/conf.d/*' >> /root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/etc/monitrc && \
-    # mkdir -p /root/x-tools/armv7-mx5-linux-gnueabihf/sysroot/usr/etc/monit/conf.d/ && \
+    # echo 'set httpd port 3813' >> /root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/etc/monitrc; \
+    # echo 'allow veex:monit' >> /root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/etc/monitrc; \
+    # echo 'include /usr/etc/monit/conf.d/*' >> /root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/etc/monitrc && \
+    # echo 'include /home/monit/conf.d/*' >> /root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/etc/monitrc && \
+    # mkdir -p /root/x-tools/armv7-mx5-linux-musleabihf/sysroot/usr/etc/monit/conf.d/ && \
     cd /root/ && tar -Jcf x-tool.tar.xz x-tools
 
 FROM ubuntu:${UBUNTU_VER} AS building-env
@@ -599,13 +600,13 @@ ENV JUPITER_DIR /jupiter
 COPY docker-entrypoint.sh $JUPITER_DIR/
 ENV JUPITER_INITIALIZED_MARK $JUPITER_DIR/patched
 RUN mkdir -p $JUPITER_DIR
-ENV PATH=$PATH:/root/x-tools/armv7-mx5-linux-gnueabihf/bin:/root/x-tools/armv7-mx5-linux-gnueabihf/fakebin
-ENV PKG_CONFIG_PATH=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/lib/pkgconfig/:/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/lib/pkgconfig/:/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/share/pkgconfig/
+ENV PATH=$PATH:/root/x-tools/armv7-mx5-linux-musleabihf/bin:/root/x-tools/armv7-mx5-linux-musleabihf/fakebin
+ENV PKG_CONFIG_PATH=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/lib/pkgconfig/:/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/lib/pkgconfig/:/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/share/pkgconfig/
 RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
     dpkg --add-architecture i386 && \
     apt-get update && \
     apt-get -y install bash nano xz-utils locales; \
-        echo 'export PATH=$PATH:/root/x-tools/armv7-mx5-linux-gnueabihf/bin:/root/x-tools/armv7-mx5-linux-gnueabihf/fakebin' >> ~/.bashrc; \
+        echo 'export PATH=$PATH:/root/x-tools/armv7-mx5-linux-musleabihf/bin:/root/x-tools/armv7-mx5-linux-musleabihf/fakebin' >> ~/.bashrc; \
         echo 'export LC_ALL="en_US.UTF-8"' >> ~/.bashrc && \
     echo "dash dash/sh boolean false" | debconf-set-selections && \
     DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash && \
