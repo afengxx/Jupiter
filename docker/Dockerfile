@@ -511,6 +511,34 @@ FROM cross-compiler-builder AS misc-builder
 # ARG CPU
 # COPY ./configuration/busybox/${CPU}/.config /${BUILD_DIR}/busybox.config
 RUN cd ${BUILD_DIR} && \
+    #kernel 2.6.35 doesn't support SYS_renameat2
+    # wget https://github.com/libfuse/libfuse/releases/download/fuse-3.10.1/fuse-3.10.1.tar.xz && \
+    # tar -xf fuse-3.10.1.tar.xz && \
+    # cd fuse-3.10.1 && sed -i '/^udev/,$ s/^/#/' util/meson.build && \
+    # echo <<< EOL \
+    #     $'[binaries]\n'\
+    #     $'c = \'armv7-mx5-linux-gnueabihf-gcc\'\n' \
+    #     $'cpp = \'armv7-mx5-linux-gnueabihf-g++\'\n' \
+    #     $'ar = \'armv7-mx5-linux-gnueabihf-ar\'\n' \
+    #     $'strip = \'armv7-mx5-linux-gnueabihf-strip\'\n' \
+    #     $'pkgconfig = \'pkg-config\'\n' \
+    #     $'[host_machine]\n' \
+    #     $'system = \'linux\'\n' \
+    #     $'cpu_family = \'arm\'\n' \
+    #     $'cpu = \'armv7\'\n' \
+    #     $'endian = \'little\'\n' \
+    # >> ./cross; \
+    # meson buildir --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr \
+    #     --cross-file cross -Dexamples=false -Ddisable-mtab=true; \
+    # echo <<< EOL \
+    #     $'#ifndef PR_SET_NO_NEW_PRIVS\n' \
+    #     $'#define PR_SET_NO_NEW_PRIVS     38\n' \
+    #     $'#define PR_GET_NO_NEW_PRIVS     39\n' \
+    #     $'#define PR_GET_TID_ADDRESS      40\n' \
+    #     $'#endif\n' \
+    # >> ./buildir/config.h; \
+    # ninja -C buildir/ install && \
+    # cd ${BUILD_DIR} && \
     wget https://busybox.net/downloads/busybox-1.32.0.tar.bz2 && \
     tar -xf busybox-1.32.0.tar.bz2 && \
     cd busybox-1.32.0 && \
