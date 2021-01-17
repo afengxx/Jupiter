@@ -22,7 +22,7 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
     apt-get update && \
     apt-get -y install locales gperf bison flex texinfo help2man gawk libtool-bin libncurses5-dev \
         bash nano wget xz-utils build-essential autoconf unzip gettext python3 pkg-config \
-        xutils-dev cmake unzip xtrans-dev git; \
+        xutils-dev cmake unzip xtrans-dev git autopoint; \
     echo "https_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
         echo "http_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
         echo "ftp_proxy = $PROXY_SERVER" >> /etc/wgetrc; \
@@ -547,6 +547,13 @@ RUN cd ${BUILD_DIR} && \
     make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-musleabihf- -j8 && \
     make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-musleabihf- \
         install CONFIG_PREFIX=/root/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/ && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/p/procps/procps_3.3.16.orig.tar.xz && \
+    tar -xf procps_3.3.16.orig.tar.xz && \
+    cd procps-3.3.16/ && ./autogen.sh && \
+    ac_cv_func_malloc_0_nonnull=yes ac_cv_func_realloc_0_nonnull=yes ./configure --host=armv7-mx5-linux-gnueabihf \
+        --prefix=/root/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget https://github.com/OpenRC/openrc/archive/master.zip -O openrc.zip && \
     unzip openrc.zip && \
