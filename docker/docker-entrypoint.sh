@@ -4,7 +4,7 @@ set -ex
 
 patch_conf() {
 
-  cd /opt/ && tar -xf x-tool.tar.xz && rm -f x-tool.tar.xz;
+  cd /opt/ && tar -xf x-tool.tar.xz;rm -f x-tool.tar.xz;
   ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime;
   export DEBIAN_FRONTEND=noninteractive;
   apt install -y rename locales libc6-i386 lib32stdc++6 \
