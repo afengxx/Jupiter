@@ -554,8 +554,8 @@ RUN cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/p/procps/procps_3.3.16.orig.tar.xz && \
     tar -xf procps_3.3.16.orig.tar.xz && \
     cd procps-3.3.16/ && ./autogen.sh && \
-    ac_cv_func_malloc_0_nonnull=yes ac_cv_func_realloc_0_nonnull=yes ./configure --host=armv7-mx5-linux-gnueabihf \
-        --prefix=/opt/x-tools/armv7-mx5-linux-gnueabihf/armv7-mx5-linux-gnueabihf/sysroot/usr/ && \
+    ac_cv_func_malloc_0_nonnull=yes ac_cv_func_realloc_0_nonnull=yes ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
     wget https://github.com/OpenRC/openrc/archive/master.zip -O openrc.zip && \
