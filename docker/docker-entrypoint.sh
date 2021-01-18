@@ -7,9 +7,9 @@ patch_conf() {
   cd /opt/ && tar -xf x-tool.tar.xz;rm -f x-tool.tar.xz;
   ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime;
   export DEBIAN_FRONTEND=noninteractive;
-  apt install -y rename locales libc6-i386 lib32stdc++6 \
-    subversion git cmake astyle libglib2.0-0:i386 gettext python3 libdbus-1-dev unzip;
-  dpkg-reconfigure --frontend noninteractive tzdata autoconf wget libtool libtool-bin autopoint;
+  apt install -y rename locales libc6-i386 lib32stdc++6 tzdata autoconf wget libtool libtool-bin \
+    subversion git cmake astyle libglib2.0-0:i386 gettext python3 libdbus-1-dev unzip autopoint ;
+  dpkg-reconfigure --frontend noninteractive;
   locale-gen en_US.UTF-8;
   mkdir -p /opt/x-tools/armv7-mx5-linux-musleabihf/fakebin/;
   find /opt/x-tools/armv7-mx5-linux-musleabihf/bin -name 'arm*' -exec ln -vs "{}" /opt/x-tools/armv7-mx5-linux-musleabihf/fakebin/ ';';
