@@ -540,8 +540,6 @@ RUN cd ${BUILD_DIR} && \
     # >> ./buildir/config.h; \
     # ninja -C buildir/ install && \
     # cd ${BUILD_DIR} && \
-    sed -i 's/#include <bits\/sockaddr.h>/#include <sys\/socket.h>/g' \
-        /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/include/linux/netlink.h && \
     wget https://busybox.net/downloads/busybox-1.32.0.tar.bz2 && \
     tar -xf busybox-1.32.0.tar.bz2 && \
     cd busybox-1.32.0 && \
@@ -558,9 +556,9 @@ RUN cd ${BUILD_DIR} && \
         --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
     cd ${BUILD_DIR} && \
-    wget https://github.com/OpenRC/openrc/archive/master.zip -O openrc.zip && \
+    wget https://github.com/OpenRC/openrc/archive/0.42.1.zip -O openrc.zip && \
     unzip openrc.zip && \
-    cd openrc-master && \
+    cd openrc-0.42.1 && \
     MKBASHCOMP=no MKNET=no MKPREFIX=no MKPKGCONFIG=no MKSELINUX=no \
         MKSTATICLIBS=no MKSYSVINIT=no MKTERMCAP=ncurses MKZSHCOMP=no \
         SH=/bin/sh DESTDIR=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/ \
@@ -573,22 +571,6 @@ RUN cd ${BUILD_DIR} && \
     ./configure --host=armv7-mx5-linux-musleabihf \
         --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
-    cd ${BUILD_DIR} && \
-    # wget https://linuxcontainers.org/downloads/lxc/lxc-2.1.1.tar.gz && \
-    # tar -xf lxc-2.1.1.tar.gz && \
-    # cd lxc-2.1.1 && \
-    git clone git://github.com/lxc/lxc -b stable-4.0 && \
-    cd lxc && ./autogen.sh && \
-    ./configure --host=armv7-mx5-linux-musleabihf with_distro="noNeed" \
-        --enable-static=no --enable-shared=yes \
-        --prefix=/usr/local/jrootfs/usr --localstatedir=/var \
-        --disable-doc --disable-api-docs --disable-examples --disable-tests with_distro="noNeed"; \
-    # echo "#define HAVE_SETNS (1)" >> src/config.h; \
-    echo "#ifndef __aligned_u64" >> src/config.h; \
-    echo "#define __aligned_u64 __u64 __attribute__((aligned(8)))" >> src/config.h; \
-    echo "#endif" >> src/config.h && \
-    make -j8 && \
-    DESTDIR=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot make install && \
     # wget https://mmonit.com/monit/dist/monit-5.27.1.tar.gz && \
     # tar -xvf monit-5.27.1.tar.gz && \
     # cd monit-5.27.1 && \
@@ -601,21 +583,89 @@ RUN cd ${BUILD_DIR} && \
     # echo 'include /usr/etc/monit/conf.d/*' >> /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/etc/monitrc && \
     # echo 'include /home/monit/conf.d/*' >> /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/etc/monitrc && \
     # mkdir -p /opt/x-tools/armv7-mx5-linux-musleabihf/sysroot/usr/etc/monit/conf.d/ && \
+    cd ${BUILD_DIR} && \
+    git clone https://github.com/karelzak/util-linux.git --depth 1 -b v2.36.1 && \
+    cd util-linux && ./autogen.sh && \
+    ./configure --without-systemd --without-python --disable-all-programs \
+        --enable-libblkid --enable-libmount --enable-mount \
+        --host=armv7-mx5-linux-musleabihf \
+        --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr && \
+    sed -i 's/mount_LDFLAGS = \$(SUID_LDFLAGS) \$(AM_LDFLAGS)/mount_LDFLAGS = \$(SUID_LDFLAGS) \$(AM_LDFLAGS) -lblkid/g' sys-utils/Makemodule.am && \
+    sed -i 's/umount_LDFLAGS = \$(SUID_LDFLAGS) \$(AM_LDFLAGS)/umount_LDFLAGS = \$(SUID_LDFLAGS) \$(AM_LDFLAGS) -lblkid/g' sys-utils/Makemodule.am && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
+    git clone https://github.com/c6supper/jchroot.git  --depth 1 && \
+    cd jchroot && \
+    CC=armv7-mx5-linux-musleabihf-gcc LDFLAGS="-static" make && \
+    cp -rf jchroot /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/bin/
+
+FROM misc-builder AS lxc-builder
+ARG CPU
+ARG BUILD_DIR
+RUN cd ${BUILD_DIR} && \
+    # wget https://linuxcontainers.org/downloads/lxc/lxc-2.1.1.tar.gz && \
+    # tar -xf lxc-2.1.1.tar.gz && \
+    # cd lxc-2.1.1 && \
+    git clone git://github.com/lxc/lxc --depth 1 -b stable-4.0 && \
+    cd lxc && ./autogen.sh && \
+    ./configure --host=armv7-mx5-linux-musleabihf with_distro="noNeed" \
+        --enable-static=no --enable-shared=yes \
+        --prefix=/usr/local/jrootfs/usr --localstatedir=/var \
+        --disable-doc --disable-api-docs --disable-examples --disable-tests with_distro="noNeed"; \
+    # echo "#define HAVE_SETNS (1)" >> src/config.h; \
+    echo "#ifndef __aligned_u64" >> src/config.h; \
+    echo "#define __aligned_u64 __u64 __attribute__((aligned(8)))" >> src/config.h; \
+    echo "#endif" >> src/config.h && \
+    make -j8 && \
+    DESTDIR=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot make install && \
     cd /opt/ && tar -Jcf x-tool.tar.xz x-tools
+
+FROM lxc-builder AS rootfs-builder
+ARG CPU
+ARG BUILD_DIR
+RUN cd ${BUILD_DIR} && \
+    git clone https://github.com/c6supper/jupiter_jrootfs.git --depth=1 jrootfs && \
+    cd jrootfs && rm -rf .git .gitignore LICENSE README.md && \
+    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/debug-root/usr/bin \
+        ./usr/local/jrootfs/ && \
+    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/bin \
+        ./usr/local/jrootfs/ && \
+    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/bin \
+        ./usr/local/jrootfs/ && \
+    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/lib \
+        ./usr/local/jrootfs/ && \
+    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/libexec \
+        ./usr/local/jrootfs/ && \
+    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/sbin \
+        ./usr/local/jrootfs/ && \
+    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/bin \
+        ./usr/local/jrootfs/usr/ && \
+    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/lib \
+        ./usr/local/jrootfs/usr/ && \
+    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/libexec \
+        ./usr/local/jrootfs/usr/ && \        
+    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ssl \
+        ./usr/local/jrootfs/usr/ && \
+    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/local/jrootfs/* \
+        ./usr/local/jrootfs/ && \
+    find \( -iname '*.a' -o -iname '*.spec' -o -iname '*.la' -o -iname '*.o' -o -iname include -o -iname pkgconfig -o -iname '*.h' \) | xargs rm -rf || true && \
+    find | xargs armv7-mx5-linux-musleabihf-strip -s || true && \
+    tar -cJf jrootfs.tar.xz ./usr && mv jrootfs.tar.xz /opt/
 
 FROM ubuntu:${UBUNTU_VER} AS building-env
 ARG DEBIAN_FRONTEND=noninteractive
-COPY --from=misc-builder /opt/x-tool.tar.xz /opt/
+COPY --from=rootfs-builder /opt/x-tool.tar.xz /opt/
 ENV JUPITER_DIR /jupiter
 COPY docker-entrypoint.sh $JUPITER_DIR/
 ENV JUPITER_INITIALIZED_MARK $JUPITER_DIR/patched
 RUN mkdir -p $JUPITER_DIR
+COPY --from=rootfs-builder /opt/jrootfs.tar.xz $JUPITER_DIR/
 ENV PATH=$PATH:/opt/x-tools/armv7-mx5-linux-musleabihf/bin:/opt/x-tools/armv7-mx5-linux-musleabihf/fakebin
 ENV PKG_CONFIG_PATH=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/lib/pkgconfig/:/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/lib/pkgconfig/:/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/share/pkgconfig/
 RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
     dpkg --add-architecture i386 && \
     apt-get update && \
-    apt-get -y install bash nano xz-utils locales; \
+    apt-get -y install bash xz-utils locales; \
         echo 'export PATH=$PATH:/opt/x-tools/armv7-mx5-linux-musleabihf/bin:/opt/x-tools/armv7-mx5-linux-musleabihf/fakebin' >> ~/.bashrc; \
         echo 'export LC_ALL="en_US.UTF-8"' >> ~/.bashrc && \
     echo "dash dash/sh boolean false" | debconf-set-selections && \
