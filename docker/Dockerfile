@@ -543,6 +543,7 @@ RUN cd ${BUILD_DIR} && \
     wget https://busybox.net/downloads/busybox-1.32.0.tar.bz2 && \
     tar -xf busybox-1.32.0.tar.bz2 && \
     cd busybox-1.32.0 && \
+    sed -i 's/reboot(magic);//g' init/init.c && \
     mv -f /${BUILD_DIR}/busybox.config .config  && \
     # make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-musleabihf- defconfig && \
     make ARCH=arm CROSS_COMPILE=armv7-mx5-linux-musleabihf- -j8 && \
@@ -559,6 +560,7 @@ RUN cd ${BUILD_DIR} && \
     wget https://github.com/OpenRC/openrc/archive/0.42.1.zip -O openrc.zip && \
     unzip openrc.zip && \
     cd openrc-0.42.1 && \
+    sed -i 's/reboot(cmd)/exit(EXIT_SUCCESS)/g' src/rc/openrc-init.c && \
     MKBASHCOMP=no MKNET=no MKPREFIX=no MKPKGCONFIG=no MKSELINUX=no \
         MKSTATICLIBS=no MKSYSVINIT=no MKTERMCAP=ncurses MKZSHCOMP=no \
         SH=/bin/sh DESTDIR=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/ \
@@ -630,14 +632,14 @@ RUN cd ${BUILD_DIR} && \
         ./usr/local/jrootfs/ && \
     cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/bin \
         ./usr/local/jrootfs/ && \
-    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/bin \
+    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/sbin \
         ./usr/local/jrootfs/ && \
     cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/lib \
         ./usr/local/jrootfs/ && \
     cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/libexec \
         ./usr/local/jrootfs/ && \
-    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/sbin \
-        ./usr/local/jrootfs/ && \
+    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/sbin \
+        ./usr/local/jrootfs/usr/ && \
     cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/bin \
         ./usr/local/jrootfs/usr/ && \
     cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/lib \
@@ -648,7 +650,9 @@ RUN cd ${BUILD_DIR} && \
         ./usr/local/jrootfs/usr/ && \
     cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/local/jrootfs/* \
         ./usr/local/jrootfs/ && \
-    find \( -iname '*.a' -o -iname '*.spec' -o -iname '*.la' -o -iname '*.o' -o -iname include -o -iname pkgconfig -o -iname '*.h' \) | xargs rm -rf || true && \
+    find \( -iname .keep -o -iname '*.a' -o -iname '*.spec' \
+        -o -iname '*.la' -o -iname '*.o' -o -iname include \
+        -o -iname pkgconfig -o -iname '*.h' \) | xargs rm -rf || true && \
     find | xargs armv7-mx5-linux-musleabihf-strip -s || true && \
     tar -cJf jrootfs.tar.xz ./usr && mv jrootfs.tar.xz /opt/
 
