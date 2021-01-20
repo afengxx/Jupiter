@@ -590,11 +590,18 @@ RUN cd ${BUILD_DIR} && \
     cd util-linux && ./autogen.sh && \
     ./configure --without-systemd --without-python --disable-all-programs \
         --enable-libblkid --enable-libmount --enable-mount \
+        --enable-static-programs=nsenter,unshare --enable-nsenter --enable-unshare \
         --host=armv7-mx5-linux-musleabihf \
         --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr && \
     sed -i 's/mount_LDFLAGS = \$(SUID_LDFLAGS) \$(AM_LDFLAGS)/mount_LDFLAGS = \$(SUID_LDFLAGS) \$(AM_LDFLAGS) -lblkid/g' sys-utils/Makemodule.am && \
     sed -i 's/umount_LDFLAGS = \$(SUID_LDFLAGS) \$(AM_LDFLAGS)/umount_LDFLAGS = \$(SUID_LDFLAGS) \$(AM_LDFLAGS) -lblkid/g' sys-utils/Makemodule.am && \
     make -j8 && make install && \
+    rm -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/bin/nsenter && \
+    rm -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/bin/unshare && \
+    mv /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/bin/unshare.static \
+        /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/bin/unshare && \
+    mv /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/bin/nsenter.static \
+        /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/bin/nsenter && \
     cd ${BUILD_DIR} && \
     git clone https://github.com/c6supper/jchroot.git  --depth 1 && \
     cd jchroot && \
@@ -623,7 +630,6 @@ RUN cd ${BUILD_DIR} && \
     cd /opt/ && tar -Jcf x-tool.tar.xz x-tools
 
 FROM lxc-builder AS rootfs-builder
-ARG CPU
 ARG BUILD_DIR
 RUN cd ${BUILD_DIR} && \
     git clone https://github.com/c6supper/jupiter_jrootfs.git --depth=1 jrootfs && \
