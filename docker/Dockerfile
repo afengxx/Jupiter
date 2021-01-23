@@ -577,18 +577,13 @@ RUN cd ${BUILD_DIR} && \
     ./configure --host=armv7-mx5-linux-musleabihf \
         --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
-    # wget https://mmonit.com/monit/dist/monit-5.27.1.tar.gz && \
-    # tar -xvf monit-5.27.1.tar.gz && \
-    # cd monit-5.27.1 && \
-    # ./configure --host=armv7-mx5-linux-musleabihf \
-    #     --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
-    #     --without-pam --without-ssl --enable-optimized && \
-    # make -j8 && make install && \
-    # echo 'set httpd port 3813' >> /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/etc/monitrc; \
-    # echo 'allow veex:monit' >> /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/etc/monitrc; \
-    # echo 'include /usr/etc/monit/conf.d/*' >> /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/etc/monitrc && \
-    # echo 'include /home/monit/conf.d/*' >> /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/etc/monitrc && \
-    # mkdir -p /opt/x-tools/armv7-mx5-linux-musleabihf/sysroot/usr/etc/monit/conf.d/ && \
+    wget https://mmonit.com/monit/dist/monit-5.27.1.tar.gz && \
+    tar -xvf monit-5.27.1.tar.gz && \
+    cd monit-5.27.1 && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
+        --without-pam --without-ssl --enable-optimized && \
+    make -j8 && make install && \
     cd ${BUILD_DIR} && \
     git clone https://github.com/karelzak/util-linux.git --depth 1 -b v2.36.1 && \
     cd util-linux && ./autogen.sh && \
@@ -660,6 +655,11 @@ RUN cd ${BUILD_DIR} && \
         ./usr/local/jrootfs/usr/ && \
     cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/local/jrootfs/* \
         ./usr/local/jrootfs/ && \
+    echo 'set httpd port 9923' >> ./usr/local/jrootfs/etc/monitrc; \
+    echo 'allow calvin:monit' >> ./usr/local/jrootfs/etc/monitrc; \
+    echo 'include /usr/etc/monit/conf.d/*' >> ./usr/local/jrootfs/etc/monitrc && \
+    echo 'include /home/monit/conf.d/*' >> ./usr/local/jrootfs/etc/monitrc && \
+    mkdir -p ./usr/local/jrootfs/usr/etc/monit/conf.d/ && \
     find \( -iname .keep -o -iname '*.a' -o -iname '*.spec' \
         -o -iname '*.la' -o -iname '*.o' -o -iname include \
         -o -iname pkgconfig -o -iname '*.h' \) | xargs rm -rf || true && \
