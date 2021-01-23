@@ -250,7 +250,7 @@ RUN cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-xcmisc/x11proto-xcmisc_1.2.2.orig.tar.gz && \
     tar -xf x11proto-xcmisc_1.2.2.orig.tar.gz && \
     cd xcmiscproto-1.2.2/ && \
-    ./configure --host=armv7-mx5-linux-musleabihf \
+    CC=armv7-mx5-linux-musleabihf-gcc ./configure --host=arm-linux-eabihf \
         --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 install && \ 
     cd ${BUILD_DIR} && \
@@ -612,26 +612,26 @@ RUN cd ${BUILD_DIR} && \
     CC=armv7-mx5-linux-musleabihf-gcc LDFLAGS="-static" make && \
     cp -rf jchroot /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/bin/
 
-# FROM misc-builder AS lxc-builder
-# ARG CPU
-# ARG BUILD_DIR
-# RUN cd ${BUILD_DIR} && \
+ FROM misc-builder AS lxc-builder
+ ARG CPU
+ ARG BUILD_DIR
+ RUN cd ${BUILD_DIR} && \
 #     # wget https://linuxcontainers.org/downloads/lxc/lxc-2.1.1.tar.gz && \
 #     # tar -xf lxc-2.1.1.tar.gz && \
 #     # cd lxc-2.1.1 && \
-#     git clone git://github.com/lxc/lxc --depth 1 -b stable-4.0 && \
-#     cd lxc && ./autogen.sh && \
-#     ./configure --host=armv7-mx5-linux-musleabihf with_distro="noNeed" \
-#         --enable-static=no --enable-shared=yes \
-#         --prefix=/usr/local/jrootfs/usr --localstatedir=/var \
-#         --disable-doc --disable-api-docs --disable-examples --disable-tests with_distro="noNeed"; \
+     git clone git://github.com/lxc/lxc --depth 1 -b stable-2.0 && \
+     cd lxc && ./autogen.sh && \
+     ./configure --host=armv7-mx5-linux-musleabihf with_distro="noNeed" \
+         --enable-static=no --enable-shared=yes \
+         --prefix=/usr/local/jrootfs/usr --localstatedir=/var \
+         --disable-doc --disable-api-docs --disable-tests --disable-werror && \
 #     # echo "#define HAVE_SETNS (1)" >> src/config.h; \
 #     echo "#ifndef __aligned_u64" >> src/config.h; \
 #     echo "#define __aligned_u64 __u64 __attribute__((aligned(8)))" >> src/config.h; \
 #     echo "#endif" >> src/config.h && \
-#     make -j8 && \
-#     DESTDIR=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot make install && \
-#     cd /opt/ && tar -Jcf x-tool.tar.xz x-tools
+     make -j8 && \
+     DESTDIR=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot make install && \
+     cd /opt/ && tar -Jcf x-tool.tar.xz x-tools
 
 FROM misc-builder AS rootfs-builder
 ARG BUILD_DIR
