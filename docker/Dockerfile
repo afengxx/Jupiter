@@ -69,7 +69,8 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
 FROM cross-compiler-builder AS x11-builder
 ARG CPU
 ARG BUILD_DIR
-RUN cd ${BUILD_DIR} && \
+RUN if [ "$WITH_X11" == "true" ]; \
+    then cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libf/libffi/libffi_3.2.1.orig.tar.gz && \
     tar -xf libffi_3.2.1.orig.tar.gz && \
     cd libffi-3.2.1 && \
@@ -250,7 +251,7 @@ RUN cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-xcmisc/x11proto-xcmisc_1.2.2.orig.tar.gz && \
     tar -xf x11proto-xcmisc_1.2.2.orig.tar.gz && \
     cd xcmiscproto-1.2.2/ && \
-    ./configure --host=armv7-mx5-linux-musleabihf \
+    CC=armv7-mx5-linux-musleabihf-gcc ./configure --host=arm-linux-eabihf \
         --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 install && \ 
     cd ${BUILD_DIR} && \
@@ -352,7 +353,8 @@ RUN cd ${BUILD_DIR} && \
     cd xinput-1.6.2/ && \
     ./configure --host=armv7-mx5-linux-musleabihf \
         --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
-    make -j8 && make install
+    make -j8 && make install; \
+    fi
 
 # FROM x11-builder AS xserver-builder
 # RUN cd ${BUILD_DIR} && \    
@@ -430,7 +432,8 @@ RUN cd ${BUILD_DIR} && \
 FROM x11-builder AS vnc-builder
 ARG CPU
 ARG BUILD_DIR
-RUN cd ${BUILD_DIR} && \
+RUN if [ "$WITH_X11" == "true" ]; \
+    then cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libv/libvncserver/libvncserver_0.9.13+dfsg.orig.tar.xz && \
     tar -xf libvncserver_0.9.13+dfsg.orig.tar.xz && \
     cd libvncserver-LibVNCServer-0.9.13/ && \
@@ -452,7 +455,8 @@ RUN cd ${BUILD_DIR} && \
     cd x11vnc-0.9.16/ && \
     ./autogen.sh --host=armv7-mx5-linux-musleabihf \
         --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
-   make -j8 && make install
+   make -j8 && make install; \
+   fi
 
 # #currently we put qt into container
 # FROM vnc-builder AS qt-builder
@@ -577,18 +581,13 @@ RUN cd ${BUILD_DIR} && \
     ./configure --host=armv7-mx5-linux-musleabihf \
         --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
     make -j8 && make install && \
-    # wget https://mmonit.com/monit/dist/monit-5.27.1.tar.gz && \
-    # tar -xvf monit-5.27.1.tar.gz && \
-    # cd monit-5.27.1 && \
-    # ./configure --host=armv7-mx5-linux-musleabihf \
-    #     --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
-    #     --without-pam --without-ssl --enable-optimized && \
-    # make -j8 && make install && \
-    # echo 'set httpd port 3813' >> /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/etc/monitrc; \
-    # echo 'allow veex:monit' >> /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/etc/monitrc; \
-    # echo 'include /usr/etc/monit/conf.d/*' >> /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/etc/monitrc && \
-    # echo 'include /home/monit/conf.d/*' >> /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/etc/monitrc && \
-    # mkdir -p /opt/x-tools/armv7-mx5-linux-musleabihf/sysroot/usr/etc/monit/conf.d/ && \
+    wget https://mmonit.com/monit/dist/monit-5.27.1.tar.gz && \
+    tar -xvf monit-5.27.1.tar.gz && \
+    cd monit-5.27.1 && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
+        --without-pam --without-ssl --enable-optimized && \
+    make -j8 && make install && \
     cd ${BUILD_DIR} && \
     git clone https://github.com/karelzak/util-linux.git --depth 1 -b v2.36.1 && \
     cd util-linux && ./autogen.sh && \
@@ -612,28 +611,28 @@ RUN cd ${BUILD_DIR} && \
     CC=armv7-mx5-linux-musleabihf-gcc LDFLAGS="-static" make && \
     cp -rf jchroot /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/bin/
 
-# FROM misc-builder AS lxc-builder
-# ARG CPU
-# ARG BUILD_DIR
-# RUN cd ${BUILD_DIR} && \
+ FROM misc-builder AS lxc-builder
+ ARG CPU
+ ARG BUILD_DIR
+ RUN cd ${BUILD_DIR} && \
 #     # wget https://linuxcontainers.org/downloads/lxc/lxc-2.1.1.tar.gz && \
 #     # tar -xf lxc-2.1.1.tar.gz && \
 #     # cd lxc-2.1.1 && \
-#     git clone git://github.com/lxc/lxc --depth 1 -b stable-4.0 && \
-#     cd lxc && ./autogen.sh && \
-#     ./configure --host=armv7-mx5-linux-musleabihf with_distro="noNeed" \
-#         --enable-static=no --enable-shared=yes \
-#         --prefix=/usr/local/jrootfs/usr --localstatedir=/var \
-#         --disable-doc --disable-api-docs --disable-examples --disable-tests with_distro="noNeed"; \
+     git clone git://github.com/lxc/lxc --depth 1 -b stable-2.0 && \
+     cd lxc && ./autogen.sh && \
+     ./configure --host=armv7-mx5-linux-musleabihf with_distro="noNeed" \
+         --enable-static=no --enable-shared=yes \
+         --prefix=/usr/local/jrootfs/usr --localstatedir=/var \
+         --disable-doc --disable-api-docs --disable-tests --disable-werror && \
 #     # echo "#define HAVE_SETNS (1)" >> src/config.h; \
 #     echo "#ifndef __aligned_u64" >> src/config.h; \
 #     echo "#define __aligned_u64 __u64 __attribute__((aligned(8)))" >> src/config.h; \
 #     echo "#endif" >> src/config.h && \
-#     make -j8 && \
-#     DESTDIR=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot make install && \
-#     cd /opt/ && tar -Jcf x-tool.tar.xz x-tools
+     make -j8 && \
+     DESTDIR=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot make install && \
+     cd /opt/ && tar -Jcf x-tool.tar.xz x-tools
 
-FROM misc-builder AS rootfs-builder
+FROM lxc-builder AS rootfs-builder
 ARG BUILD_DIR
 RUN cd ${BUILD_DIR} && \
     git clone https://github.com/c6supper/jupiter_jrootfs.git --depth=1 jrootfs && \
@@ -660,6 +659,11 @@ RUN cd ${BUILD_DIR} && \
         ./usr/local/jrootfs/usr/ && \
     cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/local/jrootfs/* \
         ./usr/local/jrootfs/ && \
+    echo 'set httpd port 9923' >> ./usr/local/jrootfs/etc/monitrc; \
+    echo 'allow calvin:monit' >> ./usr/local/jrootfs/etc/monitrc; \
+    echo 'include /usr/etc/monit/conf.d/*' >> ./usr/local/jrootfs/etc/monitrc && \
+    echo 'include /home/monit/conf.d/*' >> ./usr/local/jrootfs/etc/monitrc && \
+    mkdir -p ./usr/local/jrootfs/usr/etc/monit/conf.d/ && \
     find \( -iname .keep -o -iname '*.a' -o -iname '*.spec' \
         -o -iname '*.la' -o -iname '*.o' -o -iname include \
         -o -iname pkgconfig -o -iname '*.h' \) | xargs rm -rf || true && \

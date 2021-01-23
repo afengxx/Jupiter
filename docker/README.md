@@ -11,14 +11,14 @@
       sudo apt-get -qq -y install buildah
 2. **Checkout you kernel source code into current directory**
 3. **Example command line, 
-      docker build -t c6supper/jupiter -f Dockerfile --build-arg BUILD_TYPE="debug" \
+      docker build -t c6supper/jupiter -f Dockerfile --build-arg WITH_X11="true" \
                                                       --build-arg BUILD_DIR="/code" \
                                                       --build-arg CPU="mx5" \
                                                       --build-arg GLIB="glibc-2.23" \
                                                       --build-arg KERNEL="linux-2.6.35.3" \
                                                       --build-arg PROXY_SERVER="http://192.168.100.7:3128" ./
       or 
-      buildah build -t c6supper/jupiter -f Dockerfile --build-arg BUILD_TYPE="debug" \
+      buildah build -t c6supper/jupiter -f Dockerfile --build-arg WITH_X11="true" \
                                                       --build-arg BUILD_DIR="/code" \
                                                       --build-arg CPU="mx5" \
                                                       --build-arg GLIB="glibc-2.23" \
