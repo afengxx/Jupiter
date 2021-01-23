@@ -466,6 +466,7 @@ RUN if [ "$WITH_X11" == "true" ]; \
 #currently we put qt into container
 FROM vnc-builder AS qt-builder
 ARG CPU
+ARG BUILD_DIR
 COPY ./configuration/qt/linux-${CPU}-musleabihf-g++ /${BUILD_DIR}/linux-${CPU}-musleabihf-g++
 ARG WITH_QT
 RUN if [ "$WITH_QT" == "true" ]; \
