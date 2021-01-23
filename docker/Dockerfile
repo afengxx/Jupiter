@@ -69,6 +69,7 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/source
 FROM cross-compiler-builder AS x11-builder
 ARG CPU
 ARG BUILD_DIR
+ARG WITH_X11
 RUN if [ "$WITH_X11" == "true" ]; \
     then cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libf/libffi/libffi_3.2.1.orig.tar.gz && \
@@ -356,82 +357,86 @@ RUN if [ "$WITH_X11" == "true" ]; \
     make -j8 && make install; \
     fi
 
-# FROM x11-builder AS xserver-builder
-# RUN cd ${BUILD_DIR} && \    
-#     wget http://archive.ubuntu.com/ubuntu/pool/main/p/pixman/pixman_0.33.6.orig.tar.gz && \
-#     tar -xf pixman_0.33.6.orig.tar.gz && \
-#     cd pixman-0.33.6/ && \
-#     ./configure --host=armv7-mx5-linux-musleabihf \
-#         --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
-#     make -j8 && make install && \
-#     cd ${BUILD_DIR} && \
-#     wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-video/x11proto-video_2.3.2.orig.tar.gz && \
-#     tar -xf x11proto-video_2.3.2.orig.tar.gz && \
-#     cd videoproto-2.3.2/ && \
-#     ./configure --host=armv7-mx5-linux-musleabihf \
-#         --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
-#     make -j8 && make install && \
-#     cd ${BUILD_DIR} && \
-#     wget http://archive.ubuntu.com/ubuntu/pool/main/x/xorgproto/xorgproto_2018.4.orig.tar.gz && \
-#     tar -xf xorgproto_2018.4.orig.tar.gz && \
-#     cd xorgproto-2018.4/ && \
-#     ./configure --host=armv7-mx5-linux-musleabihf \
-#         --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
-#     make -j8 && make install && \
-#     cd ${BUILD_DIR} && \
-#     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxfont/libxfont_2.0.3.orig.tar.gz && \
-#     tar -xf libxfont_2.0.3.orig.tar.gz && \
-#     cd libXfont2-2.0.3/ && \
-#     ./configure --host=armv7-mx5-linux-musleabihf \
-#         --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
-#     make -j8 && make install && \
-#     cd ${BUILD_DIR} && \
-#     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxkbfile/libxkbfile_1.0.9.orig.tar.gz && \
-#     tar -xf libxkbfile_1.0.9.orig.tar.gz && \
-#     cd libxkbfile-1.0.9 && \
-#     ./configure --host=armv7-mx5-linux-musleabihf \
-#         --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
-#     make -j8 && make install && \
-#     cd ${BUILD_DIR} && \
-#     wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxkbcommon/libxkbcommon_0.5.0.orig.tar.gz && \
-#     tar -xf libxkbcommon_0.5.0.orig.tar.gz && \
-#     cd libxkbcommon-0.5.0/ && \
-#     ./autogen.sh && \
-#     ./configure --host=armv7-mx5-linux-musleabihf \
-#         --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
-#     make -j8 && make install && \
-#     cd ${BUILD_DIR} && \
-#     wget https://github.com/tinycorelinux/tinyx/archive/master.zip -O tinyx.zip && \
-#     unzip tinyx.zip && \
-#     cd tinyx-master/ && \
-#     autoreconf -i && \
-#     ./configure --host=armv7-mx5-linux-musleabihf \
-#         --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
-#         --disable-screensaver --disable-xdmcp --disable-xdm-auth-1 --disable-dbe \
-#         --disable-xf86bigfont --disable-dpms && \
-#     # use tinycore linux instead
-#     # wget http://archive.ubuntu.com/ubuntu/pool/main/x/xorg-server/xorg-server_1.19.6.orig.tar.gz && \
-#     # tar -xf xorg-server_1.19.6.orig.tar.gz && \
-#     # cd xorg-server-1.19.6 && \
-#     # ./configure --host=armv7-mx5-linux-musleabihf \
-#     #     --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
-#     #     --enable-docs=no --enable-devel-docs=no --enable-unit-tests=no --enable-aiglx=no \
-#     #     --enable-glx-tls=no --disable-registry --disable-composite --disable-mitshm \
-#     #     --disable-record --disable-dga --enable-dri=no --enable-dri2=no --disable-xf86vidmode \
-#     #     --disable-dpms --enable-xaa=no --enable-xorg=no --enable-vgahw=no --enable-vbe=no \
-#     #     --enable-int10-module=no --enable-libdrm=no --disable-clientids --enable-pciaccess=no \
-#     #     --enable-dmx=no --enable-xnest=no --enable-xquartz=no --enable-standalone-xpbproxy=no \
-#     #     --enable-xwin=no --enable-kdrive=yes --enable-xephyr=no --enable-xfake=no \
-#     #     --enable-xfbdev=yes --enable-kdrive-kbd=yes --enable-kdrive-mouse=yes \
-#     #     --enable-kdrive-evdev=yes --enable-unix-transport --enable-tcp-transport \
-#     #     --disable-glx --enable-sparkle=no --disable-screensaver --disable-xvmc --disable-xdmcp \
-#     #     --disable-xdm-auth-1 --disable-xinerama --disable-xace --enable-xselinux=no \
-#     #     --enable-xcsecurity=no && \
-#     make -j8 && make install
+FROM x11-builder AS xserver-builder
+ARG WITH_XSERVER
+RUN if [ "$WITH_XSERVER" == "true" ]; \
+    then cd ${BUILD_DIR} && \    
+    wget http://archive.ubuntu.com/ubuntu/pool/main/p/pixman/pixman_0.33.6.orig.tar.gz && \
+    tar -xf pixman_0.33.6.orig.tar.gz && \
+    cd pixman-0.33.6/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/x/x11proto-video/x11proto-video_2.3.2.orig.tar.gz && \
+    tar -xf x11proto-video_2.3.2.orig.tar.gz && \
+    cd videoproto-2.3.2/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/x/xorgproto/xorgproto_2018.4.orig.tar.gz && \
+    tar -xf xorgproto_2018.4.orig.tar.gz && \
+    cd xorgproto-2018.4/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxfont/libxfont_2.0.3.orig.tar.gz && \
+    tar -xf libxfont_2.0.3.orig.tar.gz && \
+    cd libXfont2-2.0.3/ && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxkbfile/libxkbfile_1.0.9.orig.tar.gz && \
+    tar -xf libxkbfile_1.0.9.orig.tar.gz && \
+    cd libxkbfile-1.0.9 && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/main/libx/libxkbcommon/libxkbcommon_0.5.0.orig.tar.gz && \
+    tar -xf libxkbcommon_0.5.0.orig.tar.gz && \
+    cd libxkbcommon-0.5.0/ && \
+    ./autogen.sh && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
+    wget https://github.com/tinycorelinux/tinyx/archive/master.zip -O tinyx.zip && \
+    unzip tinyx.zip && \
+    cd tinyx-master/ && \
+    autoreconf -i && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+        --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
+        --disable-screensaver --disable-xdmcp --disable-xdm-auth-1 --disable-dbe \
+        --disable-xf86bigfont --disable-dpms && \
+    # use tinycore linux instead
+    # wget http://archive.ubuntu.com/ubuntu/pool/main/x/xorg-server/xorg-server_1.19.6.orig.tar.gz && \
+    # tar -xf xorg-server_1.19.6.orig.tar.gz && \
+    # cd xorg-server-1.19.6 && \
+    # ./configure --host=armv7-mx5-linux-musleabihf \
+    #     --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
+    #     --enable-docs=no --enable-devel-docs=no --enable-unit-tests=no --enable-aiglx=no \
+    #     --enable-glx-tls=no --disable-registry --disable-composite --disable-mitshm \
+    #     --disable-record --disable-dga --enable-dri=no --enable-dri2=no --disable-xf86vidmode \
+    #     --disable-dpms --enable-xaa=no --enable-xorg=no --enable-vgahw=no --enable-vbe=no \
+    #     --enable-int10-module=no --enable-libdrm=no --disable-clientids --enable-pciaccess=no \
+    #     --enable-dmx=no --enable-xnest=no --enable-xquartz=no --enable-standalone-xpbproxy=no \
+    #     --enable-xwin=no --enable-kdrive=yes --enable-xephyr=no --enable-xfake=no \
+    #     --enable-xfbdev=yes --enable-kdrive-kbd=yes --enable-kdrive-mouse=yes \
+    #     --enable-kdrive-evdev=yes --enable-unix-transport --enable-tcp-transport \
+    #     --disable-glx --enable-sparkle=no --disable-screensaver --disable-xvmc --disable-xdmcp \
+    #     --disable-xdm-auth-1 --disable-xinerama --disable-xace --enable-xselinux=no \
+    #     --enable-xcsecurity=no && \
+    make -j8 && make install; \
+    fi
 
-FROM x11-builder AS vnc-builder
+FROM xserver-builder AS vnc-builder
 ARG CPU
 ARG BUILD_DIR
+ARG WITH_X11
 RUN if [ "$WITH_X11" == "true" ]; \
     then cd ${BUILD_DIR} && \
     wget http://archive.ubuntu.com/ubuntu/pool/main/libv/libvncserver/libvncserver_0.9.13+dfsg.orig.tar.xz && \
@@ -458,36 +463,39 @@ RUN if [ "$WITH_X11" == "true" ]; \
    make -j8 && make install; \
    fi
 
-# #currently we put qt into container
-# FROM vnc-builder AS qt-builder
-# ARG CPU
-# COPY ./configuration/qt/linux-${CPU}-musleabihf-g++ /${BUILD_DIR}/linux-${CPU}-musleabihf-g++
-# RUN cd ${BUILD_DIR} && \
-#     wget http://archive.ubuntu.com/ubuntu/pool/universe/t/tslib/tslib_1.21.orig.tar.xz && \
-#     tar -xf tslib_1.21.orig.tar.xz && \
-#     cd tslib-1.21/ && \
-#     echo "#define EVIOCGPROP(len)        _IOC(_IOC_READ, 'E', 0x09, len)        /* get device properties */" >> src/tslib.h && \
-#     ./configure --host=armv7-mx5-linux-musleabihf \
-#          --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
-#     make -j8 && make install && \
-#     cd ${BUILD_DIR} && \
-#     wget --no-proxy http://mirrors.ustc.edu.cn/qtproject/archive/qt/5.12/5.12.10/single/qt-everywhere-src-5.12.10.tar.xz && \
-#     tar -xf qt-everywhere-src-5.12.10.tar.xz && \
-#     cd qt-everywhere-src-5.12.10 && \
-#     mv -f /${BUILD_DIR}/linux-${CPU}-musleabihf-g++ ./qtbase/mkspecs/devices/ && \
-#     PKG_CONFIG_PATH="" PKG_CONFIG_SYSROOT_DIR="/" ./configure -sysroot /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/ \
-#         -release -linuxfb -xcb -device linux-mx5-musleabihf-g++ -device-option CROSS_COMPILE=armv7-mx5-linux-musleabihf- \
-#         -opensource -confirm-license -eventfd -inotify -no-opengl -pkg-config -force-asserts \
-#         -tslib -nomake tests -no-use-gold-linker -recheck -glib \
-#         -hostprefix /opt/x-tools/armv7-mx5-linux-musleabihf/ \
-#         -extprefix /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
-#         -prefix /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
-#         -skip qtquickcontrols -skip qtactiveqt -skip qtandroidextras -skip qtdeclarative -skip qtmacextras -skip qtserialport \
-#         -skip qtconnectivity -skip qtdoc -skip qtgraphicaleffects -skip qtlocation -skip qtmultimedia \
-#         -skip qtsensors -skip qttools -skip qtscript -skip qtwayland -skip qtwinextras -no-mtdev -no-eglfs -verbose \
-#         -no-feature-qt3d-opengl-renderer -no-feature-qt3d-render -no-feature-qt3d-simd-avx2 -no-feature-qt3d-simd-sse2 \
-#         -no-feature-qt3d-animation -no-feature-qt3d-extras -no-feature-qt3d-input -no-feature-qt3d-logic && \
-#    make -j8 && make install
+#currently we put qt into container
+FROM vnc-builder AS qt-builder
+ARG CPU
+COPY ./configuration/qt/linux-${CPU}-musleabihf-g++ /${BUILD_DIR}/linux-${CPU}-musleabihf-g++
+ARG WITH_QT
+RUN if [ "$WITH_QT" == "true" ]; \
+    then cd ${BUILD_DIR} && \
+    wget http://archive.ubuntu.com/ubuntu/pool/universe/t/tslib/tslib_1.21.orig.tar.xz && \
+    tar -xf tslib_1.21.orig.tar.xz && \
+    cd tslib-1.21/ && \
+    echo "#define EVIOCGPROP(len)        _IOC(_IOC_READ, 'E', 0x09, len)        /* get device properties */" >> src/tslib.h && \
+    ./configure --host=armv7-mx5-linux-musleabihf \
+         --prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
+    make -j8 && make install && \
+    cd ${BUILD_DIR} && \
+    wget --no-proxy http://mirrors.ustc.edu.cn/qtproject/archive/qt/5.12/5.12.10/single/qt-everywhere-src-5.12.10.tar.xz && \
+    tar -xf qt-everywhere-src-5.12.10.tar.xz && \
+    cd qt-everywhere-src-5.12.10 && \
+    mv -f /${BUILD_DIR}/linux-${CPU}-musleabihf-g++ ./qtbase/mkspecs/devices/ && \
+    PKG_CONFIG_PATH="" PKG_CONFIG_SYSROOT_DIR="/" ./configure -sysroot /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/ \
+        -release -linuxfb -xcb -device linux-mx5-musleabihf-g++ -device-option CROSS_COMPILE=armv7-mx5-linux-musleabihf- \
+        -opensource -confirm-license -eventfd -inotify -no-opengl -pkg-config -force-asserts \
+        -tslib -nomake tests -no-use-gold-linker -recheck -glib \
+        -hostprefix /opt/x-tools/armv7-mx5-linux-musleabihf/ \
+        -extprefix /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
+        -prefix /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ \
+        -skip qtquickcontrols -skip qtactiveqt -skip qtandroidextras -skip qtdeclarative -skip qtmacextras -skip qtserialport \
+        -skip qtconnectivity -skip qtdoc -skip qtgraphicaleffects -skip qtlocation -skip qtmultimedia \
+        -skip qtsensors -skip qttools -skip qtscript -skip qtwayland -skip qtwinextras -no-mtdev -no-eglfs -verbose \
+        -no-feature-qt3d-opengl-renderer -no-feature-qt3d-render -no-feature-qt3d-simd-avx2 -no-feature-qt3d-simd-sse2 \
+        -no-feature-qt3d-animation -no-feature-qt3d-extras -no-feature-qt3d-input -no-feature-qt3d-logic && \
+   make -j8 && make install; \
+   fi
 
 # FROM qt-builder AS go-builder
 # RUN cd ${BUILD_DIR} && \
@@ -515,7 +523,7 @@ RUN if [ "$WITH_X11" == "true" ]; \
 #          --with-libassuan-prefix=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ && \
 #     make -j8 && make install 
 
-FROM vnc-builder AS misc-builder
+FROM qt-builder AS misc-builder
 ARG CPU
 ARG BUILD_DIR
 COPY ./configuration/busybox/${CPU}/.config /${BUILD_DIR}/busybox.config
@@ -632,52 +640,13 @@ RUN cd ${BUILD_DIR} && \
      DESTDIR=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot make install && \
      cd /opt/ && tar -Jcf x-tool.tar.xz x-tools
 
-FROM lxc-builder AS rootfs-builder
-ARG BUILD_DIR
-RUN cd ${BUILD_DIR} && \
-    git clone https://github.com/c6supper/jupiter_jrootfs.git --depth=1 jrootfs && \
-    cd jrootfs && rm -rf .git .gitignore LICENSE README.md && \
-    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/debug-root/usr/bin \
-        ./usr/local/jrootfs/ && \
-    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/bin \
-        ./usr/local/jrootfs/ && \
-    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/sbin \
-        ./usr/local/jrootfs/ && \
-    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/lib \
-        ./usr/local/jrootfs/ && \
-    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/libexec \
-        ./usr/local/jrootfs/ && \
-    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/sbin \
-        ./usr/local/jrootfs/usr/ && \
-    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/bin \
-        ./usr/local/jrootfs/usr/ && \
-    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/lib \
-        ./usr/local/jrootfs/usr/ && \
-    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/libexec \
-        ./usr/local/jrootfs/usr/ && \        
-    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ssl \
-        ./usr/local/jrootfs/usr/ && \
-    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/local/jrootfs/* \
-        ./usr/local/jrootfs/ && \
-    echo 'set httpd port 9923' >> ./usr/local/jrootfs/etc/monitrc; \
-    echo 'allow calvin:monit' >> ./usr/local/jrootfs/etc/monitrc; \
-    echo 'include /usr/etc/monit/conf.d/*' >> ./usr/local/jrootfs/etc/monitrc && \
-    echo 'include /home/monit/conf.d/*' >> ./usr/local/jrootfs/etc/monitrc && \
-    mkdir -p ./usr/local/jrootfs/usr/etc/monit/conf.d/ && \
-    find \( -iname .keep -o -iname '*.a' -o -iname '*.spec' \
-        -o -iname '*.la' -o -iname '*.o' -o -iname include \
-        -o -iname pkgconfig -o -iname '*.h' \) | xargs rm -rf || true && \
-    find | xargs armv7-mx5-linux-musleabihf-strip -s || true && \
-    tar -cJf jrootfs.tar.xz ./usr && mv jrootfs.tar.xz /opt/
-
 FROM ubuntu:${UBUNTU_VER} AS building-env
 ARG DEBIAN_FRONTEND=noninteractive
-COPY --from=rootfs-builder /opt/x-tool.tar.xz /opt/
+COPY --from=lxc-builder /opt/x-tool.tar.xz /opt/
 ENV JUPITER_DIR /jupiter
 COPY docker-entrypoint.sh $JUPITER_DIR/
 ENV JUPITER_INITIALIZED_MARK $JUPITER_DIR/patched
 RUN mkdir -p $JUPITER_DIR
-COPY --from=rootfs-builder /opt/jrootfs.tar.xz $JUPITER_DIR/
 ENV PATH=$PATH:/opt/x-tools/armv7-mx5-linux-musleabihf/bin:/opt/x-tools/armv7-mx5-linux-musleabihf/fakebin
 ENV PKG_CONFIG_PATH=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/lib/pkgconfig/:/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/lib/pkgconfig/:/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/share/pkgconfig/
 RUN sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
