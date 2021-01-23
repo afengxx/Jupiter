@@ -633,7 +633,7 @@ RUN cd ${BUILD_DIR} && \
      DESTDIR=/opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot make install && \
      cd /opt/ && tar -Jcf x-tool.tar.xz x-tools
 
-FROM misc-builder AS rootfs-builder
+FROM lxc-builder AS rootfs-builder
 ARG BUILD_DIR
 RUN cd ${BUILD_DIR} && \
     git clone https://github.com/c6supper/jupiter_jrootfs.git --depth=1 jrootfs && \
