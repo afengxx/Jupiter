@@ -631,7 +631,7 @@ RUN cd ${BUILD_DIR} && \
      cd lxc && ./autogen.sh && \
      ./configure --host=armv7-mx5-linux-musleabihf with_distro="noNeed" \
          --enable-static=no --enable-shared=yes \
-         --prefix=/usr/local/jrootfs/usr --localstatedir=/var \
+         --prefix=/usr --localstatedir=/var \
          --disable-doc --disable-api-docs --disable-tests --disable-werror && \
 #     # echo "#define HAVE_SETNS (1)" >> src/config.h; \
 #     echo "#ifndef __aligned_u64" >> src/config.h; \
