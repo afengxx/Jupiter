@@ -627,7 +627,7 @@ RUN cd ${BUILD_DIR} && \
 #     # wget https://linuxcontainers.org/downloads/lxc/lxc-2.1.1.tar.gz && \
 #     # tar -xf lxc-2.1.1.tar.gz && \
 #     # cd lxc-2.1.1 && \
-     git clone git://github.com/lxc/lxc --depth 1 -b stable-2.0 && \
+     git clone https://github.com/c6supper/lxc.git --depth 1 -b stable-2.0-kernel-2.6.35 && \
      cd lxc && ./autogen.sh && \
      ./configure --host=armv7-mx5-linux-musleabihf with_distro="noNeed" \
          --enable-static=no --enable-shared=yes \
