@@ -43,8 +43,8 @@ pack_rootfs() {
     ./usr/local/jrootfs/usr/ && \
     cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ssl \
     ./usr/local/jrootfs/usr/ && \
-    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/local/jrootfs/* \
-    ./usr/local/jrootfs/ && \
+    cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/share/lxc \
+    ./usr/local/jrootfs/usr/share/ && \
     find \( -iname .keep -o -iname '*.a' -o -iname '*.spec' \
     -o -iname '*.la' -o -iname '*.o' -o -iname include \
     -o -iname pkgconfig -o -iname '*.h' \) | xargs rm -rf || true && \
