@@ -21,42 +21,42 @@ patch_conf() {
 
 pack_rootfs() {
     cd ${JUPITER_DIR} && \
-    git clone https://github.com/novnc/websockify-other.git && \
+    git clone https://github.com/c6supper/websockify-other.git && \
     cd websockify-other/c && \
     CC=armv7-mx5-linux-musleabihf-gcc LDFLAGS="-static" make && \
     armv7-mx5-linux-musleabihf-strip -s websockify && \
     cd ${JUPITER_DIR} && \
     git clone https://github.com/c6supper/jupiter_jrootfs.git --depth=1 jrootfs && \
     cd jrootfs && rm -rf .git .gitignore LICENSE README.md && \
-    cp -rf ${JUPITER_DIR}/websockify-other/c/websockify \
-        ./usr/local/jrootfs/usr/local/modules/common/lxc/rootfs/usr/sbin/ && \
     cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/debug-root/usr/bin \
-    ./usr/local/jrootfs/ && \
+        ./usr/local/jrootfs/ && \
     cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/bin \
-    ./usr/local/jrootfs/ && \
+        ./usr/local/jrootfs/ && \
     cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/sbin \
-    ./usr/local/jrootfs/ && \
+        ./usr/local/jrootfs/ && \
     cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/lib \
-    ./usr/local/jrootfs/ && \
+        ./usr/local/jrootfs/ && \
     cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/libexec \
-    ./usr/local/jrootfs/ && \
+        ./usr/local/jrootfs/ && \
     cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/sbin \
-    ./usr/local/jrootfs/usr/ && \
+        ./usr/local/jrootfs/usr/ && \
+    cp -rf ${JUPITER_DIR}/websockify-other/c/websockify \
+        ./usr/local/jrootfs/usr/sbin/ && \
     cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/bin \
-    ./usr/local/jrootfs/usr/ && \
+        ./usr/local/jrootfs/usr/ && \
     cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/lib \
-    ./usr/local/jrootfs/usr/ && \
+        ./usr/local/jrootfs/usr/ && \
     cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/libexec \
-    ./usr/local/jrootfs/usr/ && \
+        ./usr/local/jrootfs/usr/ && \
     cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/ssl \
-    ./usr/local/jrootfs/usr/ && \
+        ./usr/local/jrootfs/usr/ && \
     cp -rf /opt/x-tools/armv7-mx5-linux-musleabihf/armv7-mx5-linux-musleabihf/sysroot/usr/share/terminfo \
         ./usr/local/jrootfs/usr/share/ && \
     find \( -iname .keep -o -iname '*.a' -o -iname '*.spec' \
     -o -iname '*.la' -o -iname '*.o' -o -iname include \
     -o -iname pkgconfig -o -iname '*.h' \) | xargs rm -rf || true && \
     find | xargs armv7-mx5-linux-musleabihf-strip -s || true && \
-    tar -cJf jrootfs.tar.xz ./usr && mv jrootfs.tar.xz ../ && cd ../ && rm -rf jrootfs \
+    tar -cJf jrootfs.tar.xz ./usr && mv jrootfs.tar.xz ../ && cd ../ && rm -rf jrootfs && \
         rm -rf websockify-other
 }
 
